@@ -41,7 +41,7 @@ for (var i = 0; i < options.length; i++) {
 
 server.start(parsedOptions, function(err, address) {
   console.log(
-    "Listening on port " +
+    "Prerender.cloud pushstate server started on port " +
       address.port +
       " (http://" +
       address.address +
