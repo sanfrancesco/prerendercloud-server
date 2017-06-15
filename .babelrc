@@ -1,0 +1,15 @@
+{
+  "plugins": [
+  ],
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": 4
+        }
+      }
+    ],
+    ["babili"]
+  ]
+}

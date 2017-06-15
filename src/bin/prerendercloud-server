@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+
+var server = require("../index");
+
+if (process.argv[2] == "-h" || process.argv[2] == "--help") {
+  console.log(
+    "\n" +
+      "  Usage: prerendercloud-server [directory] [options]\n\n" +
+      "    Environment variables: [PORT, PRERENDER_TOKEN]\n\n" +
+      "    Options:\n\n" +
+      "      --enable-middleware-cache\n\n" +
+      "      --debug\n\n" +
+      "    Defaults:\n\n" +
+      "      current directory, port 9000, no API token\n\n" +
+      "  Examples:\n\n" +
+      "    prerendercloud-server\n\n" +
+      "    prerendercloud-server dist\n\n" +
+      "    PORT=9000 prerendercloud-server dist\n\n" +
+      "    PORT=9000 prerendercloud-server dist --enable-middleware-cache\n\n" +
+      "    PRERENDER_TOKEN=my-secret-token prerendercloud-server\n\n"
+  );
+  process.exit(0);
+}
+
+var options = process.argv.slice().slice(2);
+var parsedOptions = { directory: "." };
+
+for (var i = 0; i < options.length; i++) {
+  var opt = options[i];
+  if (opt.match(/^--/)) {
+    if (opt === "--debug" || opt === "--enable-middleware-cache") {
+      parsedOptions[opt.replace(/^--/, "")] = true;
+    } else {
+      console.log(opt + " is invalid option");
+      process.exit(1);
+    }
+  } else {
+    parsedOptions.directory = opt;
+  }
+}
+
+server.start(parsedOptions, function(err, address) {
+  console.log(
+    "Listening on port " +
+      address.port +
+      " (http://" +
+      address.address +
+      ":" +
+      address.port +
+      ")"
+  );
+
+  console.log(
+    "\nNOTE: if you're running this from your laptop, you'll need a public host or IP.\n" +
+      "You can use https://ngrok.com/ for this\n" +
+      "  If on MacOS and using Homebrew: brew install ngrok (otherwise just download it from the link)\n" +
+      "  then run:\n" +
+      "    ngrok http " +
+      address.port + "\n"
+  );
+});
