@@ -14,46 +14,65 @@ const DIRECTORY = "public";
 const FILE = "index.html";
 const HOST = "0.0.0.0";
 
+function consolePrinter(msg, indent = 0) {
+  const splitMsg = msg.split("");
+
+  let shortLinesMsg = Array(indent).join(" ");
+
+  for (let i = 0; i < splitMsg.length; i++) {
+    if (i > 0 && i % 50 === 0) {
+      if (splitMsg[i - 1] !== " " && splitMsg[i] !== " ") shortLinesMsg += "-";
+
+      shortLinesMsg += `\n${Array(indent).join(" ")}`;
+      if (splitMsg[i] !== " ") shortLinesMsg += splitMsg[i];
+    } else {
+      shortLinesMsg += splitMsg[i];
+    }
+  }
+
+  console.log(shortLinesMsg);
+}
+
 const fileChecksCWD = {
   node_modules:
-    "It looks like there's a node_modules folder in your server root.\n" +
-      "First, build (also known as bundle, or compile) your project into\n" +
-      "a directory and run this server from there\n",
+    "It looks like there's a node_modules folder in your server root. First, build (also known as bundle, or compile) your project into a directory and run this server from there",
   "Gruntfile.js":
-    "It looks like this is a Grunt based project, but you're running from the Grunt\n" +
-      "project root directory directly.\n" +
-      "You may want to run grunt build and run from the dist folder",
+    "It looks like this is a Grunt based project, but you're running from the Grunt project root directory directly. You may want to run grunt build and run from the dist folder",
   "gulpfile.js":
-    "It looks like this is a Gulp based project, but you're running from the Gulp\n" +
-      "project root directory directly.\n" +
-      "You may want to run gulp build and run from the dist folder"
+    "It looks like this is a Gulp based project, but you're running from the Gulp project root directory directly. You may want to run gulp build and run from the dist folder"
 };
 
 function sanityCheck(dir) {
-  console.log("Server root:", stdlibPath.resolve(dir));
+  console.log("\nServer root:", stdlibPath.resolve(dir), "\n");
 
   for (var file in fileChecksCWD) {
     const filePath = stdlibPath.resolve(dir, file);
     if (fs.existsSync(filePath)) {
-      console.log(fileChecksCWD[file]);
+      consolePrinter(fileChecksCWD[file], 4);
       process.exit(1);
     }
   }
 
   if (!fs.existsSync(stdlibPath.resolve(dir, "index.html"))) {
-    console.log(
-      "It looks like there's no index.html file in your server root.\n" +
-        "This server is for JavaScript single page applications that require an index.html file.\n" +
-        "Make sure you're running from your build/dist directory that has an index.html file"
+    consolePrinter(
+      "It looks like there's no index.html file in your server root. This server is for JavaScript single page applications that require an index.html file. Make sure you're running from your build/dist directory that has an index.html file",
+      4
     );
+
     process.exit(1);
   }
 }
 
 exports.start = function(options, _onStarted) {
-  console.log("\n");
-
   options = options || {};
+
+  let port = options.port || process.env.PORT || PORT;
+  let directory = options.directory || DIRECTORY;
+  let file = FILE;
+  let host = options.host || HOST;
+  let onStarted = _onStarted || function() {};
+
+  sanityCheck(directory);
 
   if (options.debug) {
     process.env["DEBUG"] = "prerendercloud";
@@ -64,15 +83,12 @@ exports.start = function(options, _onStarted) {
   if (options["enable-middleware-cache"]) {
     console.log("Enabling middleware-cache option");
     prerendercloud.set("enableMiddlewareCache", true);
+  } else {
+    consolePrinter(
+      "middleware-cache is not enabled, which means every page refresh will hit the prerender.cloud API, adding ~1.5s to each request. After verifying that things are working, use --enable-middleware-cache to speed things up",
+      4
+    );
   }
-
-  let port = options.port || process.env.PORT || PORT;
-  let directory = options.directory || DIRECTORY;
-  let file = FILE;
-  let host = options.host || HOST;
-  let onStarted = _onStarted || function() {};
-
-  sanityCheck(directory);
 
   app.use(compression());
 

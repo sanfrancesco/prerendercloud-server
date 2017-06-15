@@ -5,7 +5,7 @@ var server = require("../index");
 if (process.argv[2] == "-h" || process.argv[2] == "--help") {
   console.log(
     "\n" +
-      "  Usage: prerendercloud-server [directory] [options]\n\n" +
+      "  Usage: prerendercloud-server [options] [directory]\n\n" +
       "    Environment variables: [PORT, PRERENDER_TOKEN]\n\n" +
       "    Options:\n\n" +
       "      --enable-middleware-cache\n\n" +
@@ -15,8 +15,7 @@ if (process.argv[2] == "-h" || process.argv[2] == "--help") {
       "  Examples:\n\n" +
       "    prerendercloud-server\n\n" +
       "    prerendercloud-server dist\n\n" +
-      "    PORT=9000 prerendercloud-server dist\n\n" +
-      "    PORT=9000 prerendercloud-server dist --enable-middleware-cache\n\n" +
+      "    PORT=9000 prerendercloud-server --enable-middleware-cache dist\n\n" +
       "    PRERENDER_TOKEN=my-secret-token prerendercloud-server\n\n"
   );
   process.exit(0);
@@ -41,9 +40,9 @@ for (var i = 0; i < options.length; i++) {
 
 server.start(parsedOptions, function(err, address) {
   console.log(
-    "Prerender.cloud pushstate server started on port " +
+    "\nPrerender.cloud server started on port " +
       address.port +
-      " (http://" +
+      "\n  (http://" +
       address.address +
       ":" +
       address.port +
@@ -51,11 +50,15 @@ server.start(parsedOptions, function(err, address) {
   );
 
   console.log(
-    "\nNOTE: if you're running this from your laptop, you'll need a public host or IP.\n" +
-      "You can use https://ngrok.com/ for this\n" +
-      "  If on MacOS and using Homebrew: brew install ngrok (otherwise just download it from the link)\n" +
+    "\nNOTE: if you're running this from your laptop,\n" +
+      "  you'll need a public host or IP.\n" +
+      "  We recommend https://ngrok.com/\n" +
+      "  MacOS Homebrew users:\n" +
+      "    brew install ngrok\n" +
+      "  (other users just download from ngrok.com)\n" +
       "  then run:\n" +
       "    ngrok http " +
-      address.port + "\n"
+      address.port +
+      "\n"
   );
 });
