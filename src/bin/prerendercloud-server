@@ -1,36 +1,36 @@
 #!/usr/bin/env node
 
-var server = require("../index");
+var server = require('../index');
 
-if (process.argv[2] == "-h" || process.argv[2] == "--help") {
+if (process.argv[2] === '-h' || process.argv[2] === '--help') {
   console.log(
-    "\n" +
-      "  Usage: prerendercloud-server [options] [directory]\n\n" +
-      "    Environment variables: [PORT, PRERENDER_TOKEN]\n\n" +
-      "    Options:\n\n" +
-      "      --enable-middleware-cache\n\n" +
-      "      --debug\n\n" +
-      "    Defaults:\n\n" +
-      "      current directory, port 9000, no API token\n\n" +
-      "  Examples:\n\n" +
-      "    prerendercloud-server\n\n" +
-      "    prerendercloud-server dist\n\n" +
-      "    PORT=9000 prerendercloud-server --enable-middleware-cache dist\n\n" +
-      "    PRERENDER_TOKEN=my-secret-token prerendercloud-server\n\n"
+    '\n' +
+      '  Usage: prerendercloud-server [options] [directory]\n\n' +
+      '    Environment variables: [PORT, PRERENDER_TOKEN]\n\n' +
+      '    Options:\n\n' +
+      '      --enable-middleware-cache\n\n' +
+      '      --debug\n\n' +
+      '    Defaults:\n\n' +
+      '      current directory, port 9000, no API token\n\n' +
+      '  Examples:\n\n' +
+      '    prerendercloud-server\n\n' +
+      '    prerendercloud-server dist\n\n' +
+      '    PORT=9000 prerendercloud-server --enable-middleware-cache dist\n\n' +
+      '    PRERENDER_TOKEN=my-secret-token prerendercloud-server\n\n'
   );
   process.exit(0);
 }
 
 var options = process.argv.slice().slice(2);
-var parsedOptions = { directory: "." };
+var parsedOptions = { directory: '.' };
 
 for (var i = 0; i < options.length; i++) {
   var opt = options[i];
   if (opt.match(/^--/)) {
-    if (opt === "--debug" || opt === "--enable-middleware-cache") {
-      parsedOptions[opt.replace(/^--/, "")] = true;
+    if (opt === '--debug' || opt === '--enable-middleware-cache') {
+      parsedOptions[opt.replace(/^--/, '')] = true;
     } else {
-      console.log(opt + " is invalid option");
+      console.log(opt + ' is invalid option');
       process.exit(1);
     }
   } else {
@@ -38,27 +38,29 @@ for (var i = 0; i < options.length; i++) {
   }
 }
 
-server.start(parsedOptions, function(err, address) {
+server.start(parsedOptions, function (err, address) {
+  if (err) console.log(err);
+
   console.log(
-    "\nPrerender.cloud server started on port " +
+    '\nPrerender.cloud server started on port ' +
       address.port +
-      "\n  (http://" +
+      '\n  (http://' +
       address.address +
-      ":" +
+      ':' +
       address.port +
-      ")"
+      ')'
   );
 
   console.log(
     "\nNOTE: if you're running this from your laptop,\n" +
       "  you'll need a public host or IP.\n" +
-      "  We recommend https://ngrok.com/\n" +
-      "  MacOS Homebrew users:\n" +
-      "    brew install ngrok\n" +
-      "  (other users just download from ngrok.com)\n" +
-      "  then run:\n" +
-      "    ngrok http " +
+      '  We recommend https://ngrok.com/\n' +
+      '  MacOS Homebrew users:\n' +
+      '    brew install ngrok\n' +
+      '  (other users just download from ngrok.com)\n' +
+      '  then run:\n' +
+      '    ngrok http ' +
       address.port +
-      "\n"
+      '\n'
   );
 });

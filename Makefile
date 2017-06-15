@@ -1,6 +1,9 @@
 .PHONY: build publish test prettier
 
-prettier:
+lint:
+	yarn run lint
+
+prettier: lint
 	./node_modules/prettier/bin/prettier.js --write "src/**/*.js"
 
 build: prettier

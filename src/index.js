@@ -17,7 +17,9 @@ const HOST = "0.0.0.0";
 function consolePrinter(msg, indent = 0) {
   const splitMsg = msg.split("");
 
-  let shortLinesMsg = Array(indent).join(" ");
+  let shortLinesMsg = "";
+
+  shortLinesMsg += Array(indent).join(" ");
 
   for (let i = 0; i < splitMsg.length; i++) {
     if (i > 0 && i % 50 === 0) {

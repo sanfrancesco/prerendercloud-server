@@ -1,9 +1,10 @@
 {
   "name": "prerendercloud-server",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "Static file server that works with HTML5 Pushstate.",
   "main": "./dist/bin/prerendercloud-server",
   "scripts": {
+    "lint": "semistandard src/index.js src/bin/prerendercloud-server --fix",
     "build": "rm -rf dist && ./node_modules/.bin/babel --no-comments --compact='true' --out-dir dist src"
   },
   "repository": {
@@ -33,7 +34,8 @@
     "babel-cli": "^6.24.1",
     "babel-preset-babili": "^0.1.3",
     "babel-preset-env": "^1.5.2",
-    "prettier": "^1.4.4"
+    "prettier": "^1.4.4",
+    "semistandard": "^11.0.0"
   },
   "bin": {
     "prerendercloud-server": "./dist/bin/prerendercloud-server"
