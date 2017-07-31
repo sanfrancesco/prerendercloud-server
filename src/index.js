@@ -1,5 +1,10 @@
 "use strict";
 
+const updateNotifier = require("update-notifier");
+const pkg = require("./../package.json");
+
+updateNotifier({ pkg }).notify();
+
 const connect = require("connect");
 const path = require("path");
 const serveStatic = require("serve-static");
