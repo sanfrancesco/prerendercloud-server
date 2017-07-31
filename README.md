@@ -66,3 +66,7 @@ PORT=9000 prerendercloud-server dist --enable-middleware-cache
 # from https://www.prerender.cloud to avoid rate limits
 PRERENDER_TOKEN=my-secret-token prerendercloud-server
 ```
+
+## The _redirects file
+
+Like [Roast.io](https://www.roast.io/) and [Netlify](https://www.netlify.com/), this server supports a _redirects file - read more about it here: https://www.roast.io/docs/config/redirects
