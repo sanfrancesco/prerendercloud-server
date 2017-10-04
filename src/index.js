@@ -56,10 +56,20 @@ exports.start = function(options, _onStarted) {
   app.use(createRedirectsMiddleware());
 
   // 2. check filesystem
-  app.use(serveStatic(directory, { extensions: ["html"], etag: false }));
+  app.use(
+    serveStatic(directory, {
+      extensions: ["html"],
+      etag: false,
+      cacheControl: false,
+      lastModified: false
+    })
+  );
 
   // 3. Finally, serve the fallback file
-  app.use(serveStaticFile(path.join(directory, file)));
+  app.use(serveStaticFile(path.join(directory, file)), {
+    etag: false,
+    lastModified: false
+  });
 
   const server = app.listen(port, host, err =>
     onStarted(err, server.address())
