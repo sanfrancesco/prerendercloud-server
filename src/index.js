@@ -38,10 +38,21 @@ exports.start = function(options, _onStarted) {
 
   const prerendercloud = require("prerendercloud");
   prerendercloud.set("disableServerCache", true);
-  if (options["enable-middleware-cache"]) {
-    console.log("Enabling middleware-cache option");
-    prerendercloud.set("enableMiddlewareCache", true);
-  } else {
+
+  const optionsMap = require("./lib/options");
+  Object.keys(optionsMap).forEach(key => {
+    if (options[key]) {
+      if (key === "--enable-middleware-cache") {
+        console.log("middleware cache enabled for 1hr TTL");
+        prerendercloud.set(optionsMap[key], 1000 * 60 * 60);
+      } else {
+        console.log("enabling", key);
+        prerendercloud.set(optionsMap[key], true);
+      }
+    }
+  });
+
+  if (!options["--enable-middleware-cache"]) {
     consolePrinter(
       "middleware-cache is not enabled, which means every page refresh will hit the prerender.cloud API, adding ~1.5s to each request. After verifying that things are working, use --enable-middleware-cache to speed things up",
       4
