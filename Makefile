@@ -13,3 +13,9 @@ build: prettier
 # following https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/ for transpiled npm packages
 publish: build
 	npm publish
+
+dockerbuild:
+	docker build -t prerendercloud/webserver:latest .
+
+dockerpush:
+	docker push prerendercloud/webserver

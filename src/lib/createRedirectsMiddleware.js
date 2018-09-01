@@ -100,7 +100,7 @@ module.exports = function() {
     redirects = Redirects.from(fs.readFileSync("_redirects").toString());
   } catch (err) {
     if (err.message.match("ENOENT")) {
-      console.log("no redirects file");
+      console.log("no _redirects file was detected");
     } else {
       throw err;
     }

@@ -2,9 +2,11 @@
 
 # prerendercloud-server
 
-A pushstate server that includes the [official prerender.cloud middleware](https://github.com/sanfrancesco/prerendercloud-nodejs) for server-side rendering your single-page JavaScript applicaiton (React, Angular, Ember, Preact, Vue, etc.)
+https://www.prerender.cloud/
 
-This is mostly used for testing an app against service.prerender.cloud before going into production.
+A pushstate Node.js server that includes the [official prerender.cloud middleware](https://github.com/sanfrancesco/prerendercloud-nodejs) for server-side rendering your single-page JavaScript application (React, Angular, Ember, Preact, Vue, etc.)
+
+Designed to be an all-in-one hosting + server-side rendering solution. Run it from Node.js or as a Docker container.
 
 ## Requirements
 * index.html at the root of the deployed project
@@ -13,16 +15,48 @@ This is mostly used for testing an app against service.prerender.cloud before go
 
 read more here: https://www.prerender.cloud/docs
 
-## Usage
+## Docker usage
+
+### Local filesystem
+
+Mount the directory from your laptop/server into the Docker container at path `/wwwroot`
+
+This example assumes you're serving the `public` directory from the directory you're launching your Docker container.
+
+```
+docker run --rm --name=prerendercloud-webserver -e PRERENDER_TOKEN="my-secret-token" -e DEBUG=prerendercloud -p 9000:9000 -v $(pwd)/public:/wwwroot prerendercloud/webserver --enable-middleware-cache --disable-ajax-preload --disable-ajax-bypass --bots-only
+```
+
+### S3 Proxy
+
+Note: the S3 proxy feeature **does not cache data from S3** in the container, although it respects etags (if the client/browser sends `if-none-match`, and S3 returns 304 not modified, then the proxy returns 304 not modified). This means that this container does not need to be restarted when updating content on S3.
+
+```
+docker run --rm --name=prerendercloud-webserver -e AWS_ACCESS_KEY="my-aws-key" -e AWS_SECRET_KEY="my-aws-secret" -e PRERENDER_TOKEN="my-secret-token" -e DEBUG=prerendercloud -p 9000:9000 prerendercloud/webserver s3://my-s3-bucket --enable-middleware-cache --disable-ajax-preload --disable-ajax-bypass --bots-only
+```
+
+## Node.js Usage
 
 ```
 npm install -g prerendercloud-server
 ```
 
-now navigate to your project directory
+now navigate to your project directory (unless you're using S3, in which case it doesn't matter)
 
 ```
-usage: prerendercloud-server [options] [directory]
+usage: prerendercloud-server [options] [LocalPath or S3Uri]
+```
+
+### Local filesystem
+
+```
+PRERENDER_TOKEN="my-secret-token" prerendercloud-server . --enable-middleware-cache --disable-ajax-preload --disable-ajax-bypass --bots-only
+```
+
+### S3 Proxy
+
+```
+AWS_ACCESS_KEY="my-aws-key" -e AWS_SECRET_KEY="my-aws-secret" -e PRERENDER_TOKEN="my-secret-token" prerendercloud-server s3://my-s3-bucket --enable-middleware-cache --disable-ajax-preload --disable-ajax-bypass --bots-only
 ```
 
 ### Environment variables
@@ -36,7 +70,12 @@ usage: prerendercloud-server [options] [directory]
 * `--help`
 * `--debug`
 * `--enable-middleware-cache`
-  * a local, in-memory cache to avoid hitting service.prerender.cloud on every request
+  * a local, 1 hour TTL in-memory cache to avoid hitting service.prerender.cloud on every request
+* `--disable-ajax-preload`
+* `--disable-ajax-bypass`
+* `--meta-only`
+* `--bots-only`
+
 
 ### Examples
 
