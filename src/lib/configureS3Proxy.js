@@ -23,9 +23,14 @@ module.exports = (expressapp, bucket, key, secret) => {
     next();
   });
   expressapp.use((req, res, next) => {
+    // the s3-proxy lib doesn't make assumptions about / equating to /index.html
+    // so we have to do it ourselves
     if (req.path.endsWith("/")) {
       req.path += "index.html";
       req.originalUrl += "index.html";
+    } else if (req.path.startsWith("/?")) {
+      req.path = req.path.replace(/\/\?/, "/index.html?");
+      req.originalUrl = req.originalUrl.replace(/\/\?/, "/index.html?");
     }
     next();
   });
