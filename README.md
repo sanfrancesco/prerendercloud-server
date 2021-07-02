@@ -64,6 +64,7 @@ AWS_ACCESS_KEY="my-aws-key" -e AWS_SECRET_KEY="my-aws-secret" -e PRERENDER_TOKEN
 * `PORT`
 * `PRERENDER_TOKEN`
   * without this, you'll be rate limited. Sign up at https://www.prerender.cloud
+* `MIDDLEWARE_CACHE_MAX_MEGABYTES=1000` (defaults to 500MB, only relevant with --enable-middleware-cache)
 
 ### Options
 

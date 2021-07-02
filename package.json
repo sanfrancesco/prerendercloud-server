@@ -1,6 +1,6 @@
 {
   "name": "prerendercloud-server",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Static file server that works with HTML5 Pushstate.",
   "main": "./dist/bin/prerendercloud-server",
   "scripts": {

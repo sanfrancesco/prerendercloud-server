@@ -65,8 +65,30 @@ exports.start = function(options, _onStarted) {
   Object.keys(optionsMap).forEach(key => {
     if (options[key]) {
       if (key === "--enable-middleware-cache") {
-        console.log("middleware cache enabled for 1hr TTL");
-        prerendercloud.set(optionsMap[key], 1000 * 60 * 60);
+        console.log("middleware cache enabled");
+        prerendercloud.set(optionsMap[key], true);
+
+        const middlwareCacheMaxMegabytes = parseInt(
+          process.env.MIDDLEWARE_CACHE_MAX_MEGABYTES
+        );
+        if (
+          middlwareCacheMaxMegabytes &&
+          middlwareCacheMaxMegabytes > 1 &&
+          middlwareCacheMaxMegabytes < 10000
+        ) {
+          console.log(
+            "MIDDLEWARE_CACHE_MAX_MEGABYTES configured",
+            middlwareCacheMaxMegabytes
+          );
+          prerendercloud.set(
+            "middlewareCacheMaxBytes",
+            middlwareCacheMaxMegabytes * 1000000
+          );
+        } else {
+          console.log(
+            "MIDDLEWARE_CACHE_MAX_MEGABYTES not specified, defaulting to 500MB"
+          );
+        }
       } else if (key === "--meta-only") {
         prerendercloud.set(optionsMap[key], () => true);
       } else {
