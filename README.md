@@ -74,6 +74,7 @@ AWS_ACCESS_KEY="my-aws-key" -e AWS_SECRET_KEY="my-aws-secret" -e PRERENDER_TOKEN
   * a local, 1 hour TTL in-memory cache to avoid hitting service.prerender.cloud on every request
 * `--disable-ajax-preload`
 * `--disable-ajax-bypass`
+* `--ignore-all-query-params`
 * `--meta-only`
 * `--bots-only`
 

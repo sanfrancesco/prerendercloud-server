@@ -89,6 +89,9 @@ exports.start = function(options, _onStarted) {
             "MIDDLEWARE_CACHE_MAX_MEGABYTES not specified, defaulting to 500MB"
           );
         }
+      } else if (key === "--ignore-all-query-params") {
+        console.log("ignoring all query params");
+        prerendercloud.set("whitelistQueryParams", req => []);
       } else if (key === "--meta-only") {
         prerendercloud.set(optionsMap[key], () => true);
       } else {

@@ -13,6 +13,7 @@ if (process.argv[2] === '-h' || process.argv[2] === '--help') {
       '      --enable-middleware-cache\n\n' +
       '      --disable-ajax-preload\n\n' +
       '      --disable-ajax-bypass\n\n' +
+      '      --ignore-all-query-params\n\n' +
       '      --bots-only\n\n' +
       '      --meta-only\n\n' +
       '      --debug\n\n' +
