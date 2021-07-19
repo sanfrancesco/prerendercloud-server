@@ -3,7 +3,8 @@ var optionsMap = {
   "--disable-ajax-preload": "disableAjaxPreload",
   "--disable-ajax-bypass": "disableAjaxBypass",
   "--meta-only": "metaOnly",
-  "--bots-only": "botsOnly"
+  "--bots-only": "botsOnly",
+  "--ignore-all-query-params": "ignoreAllQueryParams"
 };
 
 module.exports = optionsMap;
