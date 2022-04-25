@@ -1,24 +1,17 @@
-from node:8.11.3-slim
+from node:14-slim
 
-# the yarn install needs this
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils apt-transport-https
 
-# 2017-01-15, I have a dev dependency of jasmine, specifying a git repo
-# but yarn --production is broken and installs dev dependencies, do I need git
-RUN apt-get install -y --no-install-recommends git-core
+RUN apt-get install -y --no-install-recommends git-core curl ca-certificates
 
-# https://yarnpkg.com/en/docs/install#linux-tab
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get install -y --no-install-recommends yarn
-
-RUN apt-get autoremove && apt-get clean
+# didn't add this for a reason, just saw it somewhere else, figured it would be useful
+RUN apt-get autoremove -y && apt-get clean -y
 
 RUN mkdir app
 workdir /app
 
-COPY package.json yarn.lock /app/
-run yarn install --production
+COPY package.json package-lock.json /app/
+run npm install --production
 
 COPY src /app/src
 
