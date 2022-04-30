@@ -4,7 +4,7 @@ var optionsMap = {
   "--disable-ajax-bypass": "disableAjaxBypass",
   "--meta-only": "metaOnly",
   "--bots-only": "botsOnly",
-  "--ignore-all-query-params": "ignoreAllQueryParams"
+  "--ignore-all-query-params": "ignoreAllQueryParams",
 };
 
 module.exports = optionsMap;

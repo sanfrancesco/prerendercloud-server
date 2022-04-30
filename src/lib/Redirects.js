@@ -16,8 +16,8 @@ module.exports = class Redirects {
   parse() {
     const str = this.raw.toString();
 
-    const isComment = line => line.match(/^(\#|\/\/|\/\*)/);
-    const isValidRedirect = redirect => {
+    const isComment = (line) => line.match(/^(\#|\/\/|\/\*)/);
+    const isValidRedirect = (redirect) => {
       if (redirect.status && isNaN(parseInt(redirect.status))) return false;
 
       if (!redirect.from) return false;
@@ -41,25 +41,27 @@ module.exports = class Redirects {
 
     const lines = str
       .split(/\r?\n/)
-      .map(line => line.trim())
-      .filter(line => line.length)
-      .filter(line => !isComment(line))
-      .map(line => line.replace(/\s+/g, " "));
+      .map((line) => line.trim())
+      .filter((line) => line.length)
+      .filter((line) => !isComment(line))
+      .map((line) => line.replace(/\s+/g, " "));
 
-    const redirects = lines.map(line => {
+    const redirects = lines.map((line) => {
       const [from, to, status] = line.split(/\s/);
       return {
         from,
         to,
-        status: status ? parseInt(status) || status : undefined
+        status: status ? parseInt(status) || status : undefined,
       };
     });
 
-    const invalid = redirects.find(redirect => !isValidRedirect(redirect));
+    const invalid = redirects.find((redirect) => !isValidRedirect(redirect));
     if (invalid) {
       throw new Error(
         "the _redirects file has the following malformed lines: " +
-          Object.values(invalid).filter(v => v).join(" ")
+          Object.values(invalid)
+            .filter((v) => v)
+            .join(" ")
       );
     }
 

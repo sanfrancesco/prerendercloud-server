@@ -8,7 +8,7 @@ const fileChecksCWD = {
   "Gruntfile.js":
     "It looks like this is a Grunt based project, but you're running from the Grunt project root directory directly. You may want to run grunt build and run from the dist folder",
   "gulpfile.js":
-    "It looks like this is a Gulp based project, but you're running from the Gulp project root directory directly. You may want to run gulp build and run from the dist folder"
+    "It looks like this is a Gulp based project, but you're running from the Gulp project root directory directly. You may want to run gulp build and run from the dist folder",
 };
 
 function sanityCheck(dir) {

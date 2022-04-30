@@ -14,12 +14,12 @@ module.exports = (expressapp, bucket, key, secret) => {
     req.app = { settings: {} };
     res.set = (key, val) => res.setHeader(key, val);
 
-    res.status = code => {
+    res.status = (code) => {
       res.statusCode = code;
       return res;
     };
 
-    res.send = body => res.end(body);
+    res.send = (body) => res.end(body);
     next();
   });
   expressapp.use((req, res, next) => {
@@ -39,7 +39,7 @@ module.exports = (expressapp, bucket, key, secret) => {
     s3Proxy({
       bucket: bucket,
       accessKeyId: key,
-      secretAccessKey: secret
+      secretAccessKey: secret,
     })
   );
 
@@ -54,7 +54,7 @@ module.exports = (expressapp, bucket, key, secret) => {
       return s3Proxy({
         bucket: bucket,
         accessKeyId: key,
-        secretAccessKey: secret
+        secretAccessKey: secret,
       })(req, res, next);
     }
     console.log({ err });

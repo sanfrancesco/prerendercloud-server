@@ -2,7 +2,8 @@
 
 // https://stackoverflow.com/a/50484916
 // eslint-disable-next-line
-const S3_BUCKET_REGEX = /(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)/;
+const S3_BUCKET_REGEX =
+  /(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)/;
 
 const updateNotifier = require("update-notifier");
 const pkg = require("./../package.json");
@@ -27,14 +28,14 @@ const sanityCheck = require("./lib/sanityCheck");
 
 const configureS3Proxy = require("./lib/configureS3Proxy");
 
-exports.start = function(options, _onStarted) {
+exports.start = function (options, _onStarted) {
   options = options || {};
 
   let port = options.port || process.env.PORT || PORT;
   let directory = options.directory || DIRECTORY;
   let file = FILE;
   let host = options.host || HOST;
-  let onStarted = _onStarted || function() {};
+  let onStarted = _onStarted || function () {};
 
   let s3Bucket = null;
 
@@ -62,7 +63,7 @@ exports.start = function(options, _onStarted) {
   prerendercloud.set("disableServerCache", true);
 
   const optionsMap = require("./lib/options");
-  Object.keys(optionsMap).forEach(key => {
+  Object.keys(optionsMap).forEach((key) => {
     if (options[key]) {
       if (key === "--enable-middleware-cache") {
         console.log("middleware cache enabled");
@@ -91,7 +92,7 @@ exports.start = function(options, _onStarted) {
         }
       } else if (key === "--ignore-all-query-params") {
         console.log("ignoring all query params");
-        prerendercloud.set("whitelistQueryParams", req => []);
+        prerendercloud.set("whitelistQueryParams", (req) => []);
       } else if (key === "--meta-only") {
         prerendercloud.set(optionsMap[key], () => true);
       } else {
@@ -129,18 +130,18 @@ exports.start = function(options, _onStarted) {
         extensions: ["html"],
         etag: false,
         cacheControl: false,
-        lastModified: false
+        lastModified: false,
       })
     );
 
     // 3. Finally, serve the fallback file
     app.use(serveStaticFile(path.join(directory, file)), {
       etag: false,
-      lastModified: false
+      lastModified: false,
     });
   }
 
-  const server = app.listen(port, host, err =>
+  const server = app.listen(port, host, (err) =>
     onStarted(err, server.address())
   );
 

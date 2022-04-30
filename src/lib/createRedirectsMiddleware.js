@@ -7,16 +7,16 @@ const request = require("request");
 const Redirects = require("./Redirects");
 const fs = require("fs");
 
-const starPathToRegex = starPath =>
+const starPathToRegex = (starPath) =>
   new RegExp(`${starPath}`.replace(/\*/, "(.*)"));
 
-const splatRedirectWithRegex = redirect =>
+const splatRedirectWithRegex = (redirect) =>
   Object.assign({}, redirect, {
-    regex: starPathToRegex(redirect.from)
+    regex: starPathToRegex(redirect.from),
   });
 
-const findAndRemoveFirstMatchingRedirect = function(redirects, path) {
-  const foundRedirect = redirects.find(redirect => {
+const findAndRemoveFirstMatchingRedirect = function (redirects, path) {
+  const foundRedirect = redirects.find((redirect) => {
     const isNormalMatch = redirect.from === path;
     const isSplatMatch = redirect.regex && path.match(redirect.regex);
 
@@ -43,9 +43,9 @@ const findAndRemoveFirstMatchingRedirect = function(redirects, path) {
   return null;
 };
 
-const redirect = function(status, to, req, res) {
+const redirect = function (status, to, req, res) {
   res.writeHead(status, {
-    Location: to
+    Location: to,
   });
   return res.end();
 };
@@ -59,7 +59,7 @@ function handleRedirect(req, res, next) {
     console.log("redirecting", {
       from: req.url,
       to: redirect.to,
-      status: redirect.status
+      status: redirect.status,
     });
     return redirect(redirect.status, redirect.to);
   } else {
@@ -68,7 +68,7 @@ function handleRedirect(req, res, next) {
     if (to.startsWith("http")) {
       console.log("streaming", {
         from: req.url,
-        to: redirect.to
+        to: redirect.to,
       });
       // proxy
       delete req.headers.referer;
@@ -80,7 +80,7 @@ function handleRedirect(req, res, next) {
       console.log("rewriting", {
         from: req.url,
         to: redirect.to,
-        status: redirect.status
+        status: redirect.status,
       });
       if (to[0] !== "/") {
         req.url = "/" + to;
@@ -93,7 +93,7 @@ function handleRedirect(req, res, next) {
   }
 }
 
-module.exports = function() {
+module.exports = function () {
   let redirects = [];
 
   try {
@@ -106,11 +106,8 @@ module.exports = function() {
     }
   }
   if (redirects.length) {
-    redirects = redirects.map(
-      redirect =>
-        Redirects.isSplat(redirect)
-          ? splatRedirectWithRegex(redirect)
-          : redirect
+    redirects = redirects.map((redirect) =>
+      Redirects.isSplat(redirect) ? splatRedirectWithRegex(redirect) : redirect
     );
     console.log(
       "\n---\n_redirects file successfully parsed",
@@ -119,7 +116,7 @@ module.exports = function() {
     );
   }
 
-  return function(req, res, next) {
+  return function (req, res, next) {
     req.redirects = redirects.slice();
     return handleRedirect(req, res, next);
   };
