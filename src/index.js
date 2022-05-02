@@ -16,17 +16,17 @@ const serveStatic = require("serve-static");
 const serveStaticFile = require("connect-static-file");
 const compression = require("compression");
 const app = connect();
-const createRedirectsMiddleware = require("./lib/createRedirectsMiddleware");
+const createRedirectsMiddleware = require("./lib/create-redirects-middleware");
 
 const PORT = 9000;
 const DIRECTORY = "public";
 const FILE = "index.html";
 const HOST = "0.0.0.0";
 
-const consolePrinter = require("./lib/consolePrinter");
-const sanityCheck = require("./lib/sanityCheck");
+const consolePrinter = require("./lib/console-printer");
+const sanityCheck = require("./lib/sanity-check");
 
-const configureS3Proxy = require("./lib/configureS3Proxy");
+const configureS3Proxy = require("./lib/configure-s3-proxy");
 
 exports.start = function (options, _onStarted) {
   options = options || {};

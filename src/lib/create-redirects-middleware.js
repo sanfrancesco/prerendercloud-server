@@ -4,7 +4,7 @@
 // HTTP requests (this does not collapse requests)
 
 const request = require("request");
-const Redirects = require("./Redirects");
+const Redirects = require("./redirects");
 const fs = require("fs");
 
 const starPathToRegex = (starPath) =>
