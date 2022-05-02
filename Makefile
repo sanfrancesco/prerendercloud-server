@@ -5,7 +5,6 @@ prettier:
 
 build: prettier
 	npm run build
-	cp -r src/bin dist
 	rm -rf publish
 	mkdir publish
 	cp -r dist publish/
