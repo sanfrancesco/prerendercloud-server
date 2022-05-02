@@ -1,4 +1,4 @@
-const consolePrinter = require("./consolePrinter");
+const consolePrinter = require("./console-printer");
 const stdlibPath = require("path");
 const fs = require("fs");
 

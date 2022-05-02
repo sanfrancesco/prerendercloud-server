@@ -1,6 +1,8 @@
-![image](https://cloud.githubusercontent.com/assets/22159102/21554484/9d542f5a-cdc4-11e6-8c4c-7730a9e9e2d1.png)
-
 # prerendercloud-server
+
+<img align="right" src="https://cloud.githubusercontent.com/assets/22159102/21554484/9d542f5a-cdc4-11e6-8c4c-7730a9e9e2d1.png">
+
+![Github Actions CI](https://github.com/sanfrancesco/prerendercloud-server/actions/workflows/node.js.yml/badge.svg)
 
 https://www.prerender.cloud/
 
@@ -110,4 +112,59 @@ PRERENDER_TOKEN=my-secret-token prerendercloud-server
 
 ## The _redirects file
 
-Like [Roast.io](https://www.roast.io/) and [Netlify](https://www.netlify.com/), this server supports a _redirects file - read more about it here: https://www.roast.io/docs/config/redirects
+Similar to [Netlify's _redirects file](https://docs.netlify.com/routing/redirects/#syntax-for-the-redirects-file), this project supports a _redirects file.
+
+Why use this? For redirects, rewrites. This includes avoiding CORS configuration by redirecting a same origin path to a remote API.
+In other words, some additional control over routing logic.
+
+* A plain text file in the root of your deploy with the file name _redirects for controlling routing logic
+* Each line is 3 fields separated by any amount of white space:
+
+```
+/source/path /destination/path statusCode
+```
+
+* The /sourcePath and /destinationPath must start with /
+* The status code field is optional and if not specified, defaults to 301.
+* Using 200 as a status code is a "rewrite" (or proxy), the user will not see the final/true destination.
+* Comments start with #
+* White space around or between lines is ignored so use it for readability.
+
+### Examples
+
+(note: the html file extension is optional)
+
+**This rule is already included by default** since this project is for single-page apps, shown here only as an example of what it would look like if not already included.
+```
+/* /index.html 200
+```
+
+**200 rewrite/proxy splat (wildcard)**
+
+* (for avoiding CORS config on your server)
+* (wildcards (asterisks) can only be at the end of a sourcePath and if used, the destinationPath must have :splat at the end)
+
+```
+/api/v1/* http://example.com/api/v1/:splat 200
+```
+
+**301 redirect /documentation to /docs**
+
+```
+/documentation /docs
+```
+
+
+**302 redirect /documentation to /docs**
+
+(same as above, but use 302 instead of the default of 301)
+
+```
+/documentation /docs 302
+```
+
+**200 rewrite/proxy /documentation to /docs**
+
+```
+/documentation /docs 200
+```

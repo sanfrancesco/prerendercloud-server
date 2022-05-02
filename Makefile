@@ -3,9 +3,14 @@
 prettier:
 	./node_modules/.bin/prettier --write "src/**/*.js"
 
+test:
+	DEBUG=prerendercloud \
+	NODE_ENV=test \
+	PRERENDER_SERVICE_URL="https://service.prerender.cloud" \
+	./node_modules/jasmine/bin/jasmine.js
+
 build: prettier
 	npm run build
-	cp -r src/bin dist
 	rm -rf publish
 	mkdir publish
 	cp -r dist publish/
