@@ -73,5 +73,46 @@ describe("root", function () {
       expect(res.status).toEqual(200);
       expect(res.text).toEqual(INDEX_HTML_RAW_SOURCE);
     });
+
+    describe("_redirects", function () {
+      it("rewrites", async function () {
+        const res = await requestWithSupertest
+          .get("/page200rewrite")
+          .set("user-agent", this.userAgent);
+
+        expect(res.status).toEqual(200);
+        expect(res.text).toEqual("page1");
+      });
+
+      it("redirects", async function () {
+        const res = await requestWithSupertest
+          .get("/page301redirect")
+          .set("user-agent", this.userAgent);
+
+        expect(res.status).toEqual(301);
+        expect(res.headers.location).toEqual("/page1");
+        expect(res.text).toEqual("");
+      });
+
+      describe("with api", function () {
+        beforeEach(function () {
+          this.exampleDotComServer = nock("http://example.com/api/v1/users")
+            .get(/.*/)
+            .reply((uri) => {
+              console.log({ uri });
+              this.exampleDotComServerUri = uri;
+              return [200, "example-users"];
+            });
+        });
+        it("splat redirects", async function () {
+          const res = await requestWithSupertest
+            .get("/api/v1/users")
+            .set("user-agent", this.userAgent);
+
+          expect(res.status).toEqual(200);
+          expect(res.text).toEqual("example-users");
+        });
+      });
+    });
   });
 });

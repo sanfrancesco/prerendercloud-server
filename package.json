@@ -27,7 +27,7 @@
     "connect": "^3.7.0",
     "connect-static-file": "2.0.0",
     "prerendercloud": "1.45.4",
-    "node-fetch": "^3.2.4",
+    "got-lite": "^8.0.1",
     "s3-proxy": "^1.2.1",
     "serve-static": "1.15.0",
     "update-notifier": "^5.1.0"

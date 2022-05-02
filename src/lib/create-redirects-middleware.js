@@ -3,7 +3,7 @@
 // another redirect from /path2 to /path3, it will be 2 separate
 // HTTP requests (this does not collapse requests)
 
-const request = require("request");
+const got = require("got-lite");
 const Redirects = require("./redirects");
 const fs = require("fs");
 
@@ -51,36 +51,39 @@ const redirect = function (status, to, req, res) {
 };
 
 function handleRedirect(req, res, next) {
-  const redirect = findAndRemoveFirstMatchingRedirect(req.redirects, req.url);
+  const foundRedirect = findAndRemoveFirstMatchingRedirect(
+    req.redirects,
+    req.url
+  );
 
-  if (!redirect) return next();
+  if (!foundRedirect) return next();
 
-  if (`${redirect.status}`.startsWith(3)) {
+  if (`${foundRedirect.status}`.startsWith(3)) {
     console.log("redirecting", {
       from: req.url,
-      to: redirect.to,
-      status: redirect.status,
+      to: foundRedirect.to,
+      status: foundRedirect.status,
     });
-    return redirect(redirect.status, redirect.to);
+    return redirect(foundRedirect.status, foundRedirect.to, req, res);
   } else {
-    const to = redirect.to;
+    const to = foundRedirect.to;
 
     if (to.startsWith("http")) {
       console.log("streaming", {
         from: req.url,
-        to: redirect.to,
+        to: foundRedirect.to,
       });
       // proxy
       delete req.headers.referer;
-      const stream = request(to);
+      const stream = got.stream(to);
       stream.on("error", console.error);
       req.pipe(stream);
       return stream.pipe(res);
     } else {
       console.log("rewriting", {
         from: req.url,
-        to: redirect.to,
-        status: redirect.status,
+        to: foundRedirect.to,
+        status: foundRedirect.status,
       });
       if (to[0] !== "/") {
         req.url = "/" + to;
