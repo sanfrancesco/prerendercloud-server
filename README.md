@@ -1,6 +1,8 @@
-![image](https://cloud.githubusercontent.com/assets/22159102/21554484/9d542f5a-cdc4-11e6-8c4c-7730a9e9e2d1.png)
-
 # prerendercloud-server
+
+<img align="right" src="https://cloud.githubusercontent.com/assets/22159102/21554484/9d542f5a-cdc4-11e6-8c4c-7730a9e9e2d1.png">
+
+![Github Actions CI](https://github.com/sanfrancesco/prerendercloud-server/actions/workflows/node.js.yml/badge.svg)
 
 https://www.prerender.cloud/
 
