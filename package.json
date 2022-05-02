@@ -33,7 +33,10 @@
     "update-notifier": "^5.1.0"
   },
   "devDependencies": {
-    "prettier": "^2.6.2"
+    "jasmine": "^4.1.0",
+    "nock": "^13.2.4",
+    "prettier": "^2.6.2",
+    "supertest": "^6.2.3"
   },
   "bin": {
     "prerendercloud-server": "./dist/bin/prerendercloud-server"
