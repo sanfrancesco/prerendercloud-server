@@ -22,13 +22,30 @@ A pushstate Node.js http server that includes the [official prerender.cloud midd
 Designed to be an all-in-one hosting + server-side rendering solution for single-page JavaScript apps needing pre-rendering or a generic solution to server-side rendering. Run it from Node.js or as a Docker container.
 
 ## Requirements
-* index.html at the root of the deployed project
-* pushstate URLs
-* React, Preact, Angular, Ember, Vue, or any SPA framework that rewrites a container DOM element (Angular users must use templates)
+
+- index.html at the root of the deployed project
+- pushstate URLs
+- React, Preact, Angular, Ember, Vue, or any SPA framework that rewrites a container DOM element (Angular users must use templates)
 
 Note: this package disables prerender.cloud's server cache and requires you to opt-in to local caching. The consequence of this default config is every request to this server will be forwarded to service.prerener.cloud AND trigger a \~1.5s render. Why? Because this default config is useful for initial debugging. After things are working and you're deploying to production use `--enable-middleware-cache` and reboot this process when you need to clear that local cache (i.e. you need freshly pre-rendered pages)
 
 Read all documentation here: https://www.prerender.cloud/docs and read more about the config options here: https://github.com/sanfrancesco/prerendercloud-nodejs
+
+<!-- MarkdownTOC autolink="true" -->
+
+- [Fly.io example](#flyio-example)
+- [Docker local filesystem example](#docker-local-filesystem-example)
+- [Docker S3 proxy example](#docker-s3-proxy-example)
+- [Plain old Node.js example](#plain-old-nodejs-example)
+- [Plain old Node.js local filesystem example](#plain-old-nodejs-local-filesystem-example)
+- [Plain old Node.js S3 proxy example](#plain-old-nodejs-s3-proxy-example)
+- [Environment variables](#environment-variables)
+- [Options](#options)
+- [More Examples](#more-examples)
+- [The `_whitelist.js` file](#the-_whitelistjs-file)
+- [The `_redirects` file](#the-_redirects-file)
+
+<!-- /MarkdownTOC -->
 
 #### Fly.io example
 
@@ -117,34 +134,32 @@ s3://my-s3-bucket \
 
 #### Environment variables
 
-* `PORT`
-* `PRERENDER_TOKEN`
-  * without this, you'll be rate limited. Sign up at https://www.prerender.cloud
-* `MIDDLEWARE_CACHE_MAX_MEGABYTES=1000` (defaults to 500MB, only relevant with --enable-middleware-cache)
+- `PORT`
+- `PRERENDER_TOKEN`
+  - without this, you'll be rate limited. Sign up at https://www.prerender.cloud
+- `MIDDLEWARE_CACHE_MAX_MEGABYTES=1000` (defaults to 500MB, only relevant with --enable-middleware-cache)
 
 #### Options
 
 Read more about these options here: https://github.com/sanfrancesco/prerendercloud-nodejs
 
-* `--help`
-* `--debug`
-* `--enable-middleware-cache`
-  * a local in-memory cache that does not expire (reboot to clear cache) to avoid hitting service.prerender.cloud on every request
-* `--meta-only`
-  * when you only want to pre-render the `<head />` (useful if all you care about is open graph and meta tags)
-* `--bots-only`
-* `--ignore-all-query-params`
-* `--remove-trailing-slash`
-* `--disable-ajax-preload`
-* `--disable-ajax-bypass`
-* `--disable-head-dedupe`
-* `--remove-script-tags`
-* `--wait-extra-long`
-* `--follow-redirects`
-* `--bubble-up-5xx-errors`
-* `--throttle-on-fail`
-
-
+- `--help`
+- `--debug`
+- `--enable-middleware-cache`
+  - a local in-memory cache that does not expire (reboot to clear cache) to avoid hitting service.prerender.cloud on every request
+- `--meta-only`
+  - when you only want to pre-render the `<head />` (useful if all you care about is open graph and meta tags)
+- `--bots-only`
+- `--ignore-all-query-params`
+- `--remove-trailing-slash`
+- `--disable-ajax-preload`
+- `--disable-ajax-bypass`
+- `--disable-head-dedupe`
+- `--remove-script-tags`
+- `--wait-extra-long`
+- `--follow-redirects`
+- `--bubble-up-5xx-errors`
+- `--throttle-on-fail`
 
 #### More Examples
 
@@ -189,37 +204,37 @@ Example `_whitelist.js` file:
 module.exports = ["/", "/docs", /\/users\/\d{1,6}\/profile\/?$/];
 ```
 
-
 #### The `_redirects` file
 
-Similar to [Netlify's _redirects file](https://docs.netlify.com/routing/redirects/#syntax-for-the-redirects-file), this project will parse a `_redirects` file in the wwwroot (same place as your index.html).
+Similar to [Netlify's \_redirects file](https://docs.netlify.com/routing/redirects/#syntax-for-the-redirects-file), this project will parse a `_redirects` file in the wwwroot (same place as your index.html).
 
 Why use this? For redirects, rewrites. This includes avoiding CORS configuration by redirecting a same origin path to a remote API.
 In other words, some additional control over routing logic.
 
-* A plain text file in the root of your deploy with the file name _redirects for controlling routing logic
-* Each line is 3 fields separated by any amount of white space:
+- A plain text file in the root of your deploy with the file name \_redirects for controlling routing logic
+- Each line is 3 fields separated by any amount of white space:
 
 ```
 /source/path /destination/path statusCode
 ```
 
-* The /sourcePath and /destinationPath must start with /
-* The status code field is optional and if not specified, defaults to 301.
-* Using 200 as a status code is a "rewrite" (or proxy), the user will not see the final/true destination.
-* Comments start with #
-* White space around or between lines is ignored so use it for readability.
-* html file extension is optional
+- The /sourcePath and /destinationPath must start with /
+- The status code field is optional and if not specified, defaults to 301.
+- Using 200 as a status code is a "rewrite" (or proxy), the user will not see the final/true destination.
+- Comments start with #
+- White space around or between lines is ignored so use it for readability.
+- html file extension is optional
 
 **This rule is already included by default** since this project is for single-page apps. Shown here only as an example of what it would look like if not already included.
+
 ```
 /* /index.html 200
 ```
 
 **200 rewrite/proxy splat (wildcard)**
 
-* (for avoiding CORS config on your server)
-* (wildcards (asterisks) can only be at the end of a sourcePath and if used, the destinationPath must have :splat at the end)
+- (for avoiding CORS config on your server)
+- (wildcards (asterisks) can only be at the end of a sourcePath and if used, the destinationPath must have :splat at the end)
 
 ```
 /api/v1/* http://example.com/api/v1/:splat 200
@@ -230,7 +245,6 @@ In other words, some additional control over routing logic.
 ```
 /documentation /docs
 ```
-
 
 **302 redirect /documentation to /docs**
 
