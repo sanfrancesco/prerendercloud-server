@@ -8,36 +8,66 @@ https://www.prerender.cloud/
 
 A pushstate Node.js server that includes the [official prerender.cloud middleware](https://github.com/sanfrancesco/prerendercloud-nodejs) for server-side rendering your single-page JavaScript application (React, Angular, Ember, Preact, Vue, etc.)
 
-Designed to be an all-in-one hosting + server-side rendering solution. Run it from Node.js or as a Docker container.
+Designed to be an all-in-one hosting + server-side rendering solution for single-page JavaScript apps needing pre-rendering or a generic solution to server-side rendering. Run it from Node.js or as a Docker container.
 
 ## Requirements
 * index.html at the root of the deployed project
 * pushstate URLs
 * React, Preact, Angular, Ember, Vue, or any SPA framework that rewrites a container DOM element (Angular users must use templates)
 
-read more here: https://www.prerender.cloud/docs
+Note: this package disables prerender.cloud's server cache and requires you to opt-in to local caching. The consequence of this default config is every request to this server will be forwarded to service.prerener.cloud AND trigger a \~1.5s render. Why? Because this default config is useful for initial debugging. After things are working and you're deploying to production use `--enable-middleware-cache` and reboot this process when you need to clear that local cache (i.e. you need freshly pre-rendered pages)
 
-## Docker usage
+Read all documentation here: https://www.prerender.cloud/docs and read more about the config options here: https://github.com/sanfrancesco/prerendercloud-nodejs
 
-### Local filesystem
+#### Fly.io example
+
+Fly.io is a modern app deployment platform that can run Dockerfiles and is a painless way to run prerendercloud-server.
+
+See fly-io in the [examples directory](examples/fly-io/README.md)
+
+#### Docker local filesystem example
 
 Mount the directory from your laptop/server into the Docker container at path `/wwwroot`
 
-This example assumes you're serving the `public` directory from the directory you're launching your Docker container.
+This example assumes you're serving the `dist` directory from the directory you're launching your Docker container.
 
 ```
-docker run --rm --name=prerendercloud-webserver -e PRERENDER_TOKEN="my-secret-token" -e DEBUG=prerendercloud -p 9000:9000 -v $(pwd)/public:/wwwroot prerendercloud/webserver --enable-middleware-cache --disable-ajax-preload --disable-ajax-bypass --bots-only
+docker run \
+  --rm \
+  --name=prerendercloud-webserver \
+  -e PRERENDER_TOKEN="my-secret-token" \
+  -e DEBUG=prerendercloud \
+  -p 9000:9000 \
+  -v $(pwd)/dist:/wwwroot \
+  prerendercloud/webserver \
+  --enable-middleware-cache \
+  --disable-ajax-preload \
+  --disable-ajax-bypass \
+  --bots-only
 ```
 
-### S3 Proxy
+#### Docker S3 proxy example
 
 Note: the S3 proxy feeature **does not cache data from S3** in the container, although it respects etags (if the client/browser sends `if-none-match`, and S3 returns 304 not modified, then the proxy returns 304 not modified). This means that this container does not need to be restarted when updating content on S3.
 
 ```
-docker run --rm --name=prerendercloud-webserver -e AWS_ACCESS_KEY="my-aws-key" -e AWS_SECRET_KEY="my-aws-secret" -e PRERENDER_TOKEN="my-secret-token" -e DEBUG=prerendercloud -p 9000:9000 prerendercloud/webserver s3://my-s3-bucket --enable-middleware-cache --disable-ajax-preload --disable-ajax-bypass --bots-only
+docker run \
+  --rm \
+  --name=prerendercloud-webserver \
+  -e AWS_ACCESS_KEY="my-aws-key" \
+  -e AWS_SECRET_KEY="my-aws-secret" \
+  -e PRERENDER_TOKEN="my-secret-token" \
+  -e DEBUG=prerendercloud \
+  -p 9000:9000 \
+  prerendercloud/webserver \
+  s3://my-s3-bucket \
+  --enable-middleware-cache \
+  --disable-ajax-preload \
+  --disable-ajax-bypass \
+  --bots-only
 ```
 
-## Node.js Usage
+#### Plain old Node.js example
 
 ```
 npm install -g prerendercloud-server
@@ -49,39 +79,53 @@ now navigate to your project directory (unless you're using S3, in which case it
 usage: prerendercloud-server [options] [LocalPath or S3Uri]
 ```
 
-### Local filesystem
+#### Plain old Node.js local filesystem example
 
 ```
-PRERENDER_TOKEN="my-secret-token" prerendercloud-server . --enable-middleware-cache --disable-ajax-preload --disable-ajax-bypass --bots-only
+PRERENDER_TOKEN="my-secret-token" \
+prerendercloud-server . \
+--enable-middleware-cache \
+--disable-ajax-preload \
+--disable-ajax-bypass \
+--bots-only
 ```
 
-### S3 Proxy
+#### Plain old Node.js S3 proxy example
 
 ```
-AWS_ACCESS_KEY="my-aws-key" -e AWS_SECRET_KEY="my-aws-secret" -e PRERENDER_TOKEN="my-secret-token" prerendercloud-server s3://my-s3-bucket --enable-middleware-cache --disable-ajax-preload --disable-ajax-bypass --bots-only
+AWS_ACCESS_KEY="my-aws-key" \
+-e AWS_SECRET_KEY="my-aws-secret" \
+-e PRERENDER_TOKEN="my-secret-token" \
+prerendercloud-server \
+s3://my-s3-bucket \
+--enable-middleware-cache \
+--disable-ajax-preload \
+--disable-ajax-bypass \
+--bots-only
 ```
 
-### Environment variables
+#### Environment variables
 
 * `PORT`
 * `PRERENDER_TOKEN`
   * without this, you'll be rate limited. Sign up at https://www.prerender.cloud
 * `MIDDLEWARE_CACHE_MAX_MEGABYTES=1000` (defaults to 500MB, only relevant with --enable-middleware-cache)
 
-### Options
+#### Options
 
 * `--help`
 * `--debug`
 * `--enable-middleware-cache`
-  * a local, 1 hour TTL in-memory cache to avoid hitting service.prerender.cloud on every request
+  * a local in-memory cache that does not expire (reboot to clear cache) to avoid hitting service.prerender.cloud on every request
 * `--disable-ajax-preload`
 * `--disable-ajax-bypass`
+* `--disable-head-dedupe`
 * `--ignore-all-query-params`
 * `--meta-only`
 * `--bots-only`
 
 
-### Examples
+#### More Examples
 
 ```
 # start the server in the current directory
@@ -110,9 +154,24 @@ PORT=9000 prerendercloud-server dist --enable-middleware-cache
 PRERENDER_TOKEN=my-secret-token prerendercloud-server
 ```
 
-## The _redirects file
+#### The `_whitelist.js` file
 
-Similar to [Netlify's _redirects file](https://docs.netlify.com/routing/redirects/#syntax-for-the-redirects-file), this project supports a _redirects file.
+This project will parse an actual JavaScript file (not JSON) with the filename `_whitelist.js` if in the wwwroot (same place as your index.html).
+
+This file configures the `whitelistPaths` option of the underlying prerendercloud-nodejs middleware. It reduces your potential billing/costs by preventing bots or bad actors from scraping random URLs.
+
+Example `_whitelist.js` file:
+
+```javascript
+// strings or regexes
+// if this file doesn't exist or the array is empty, any requested path will be pre-rendered
+module.exports = ["/", "/docs", /\/users\/\d{1,6}\/profile\/?$/];
+```
+
+
+#### The `_redirects` file
+
+Similar to [Netlify's _redirects file](https://docs.netlify.com/routing/redirects/#syntax-for-the-redirects-file), this project will parse a `_redirects` file in the wwwroot (same place as your index.html).
 
 Why use this? For redirects, rewrites. This includes avoiding CORS configuration by redirecting a same origin path to a remote API.
 In other words, some additional control over routing logic.
@@ -129,12 +188,9 @@ In other words, some additional control over routing logic.
 * Using 200 as a status code is a "rewrite" (or proxy), the user will not see the final/true destination.
 * Comments start with #
 * White space around or between lines is ignored so use it for readability.
+* html file extension is optional
 
-### Examples
-
-(note: the html file extension is optional)
-
-**This rule is already included by default** since this project is for single-page apps, shown here only as an example of what it would look like if not already included.
+**This rule is already included by default** since this project is for single-page apps. Shown here only as an example of what it would look like if not already included.
 ```
 /* /index.html 200
 ```

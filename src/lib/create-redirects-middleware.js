@@ -6,6 +6,10 @@
 const got = require("got-lite");
 const Redirects = require("./redirects");
 const fs = require("fs");
+const stdlibPath = require("path");
+const debug = require("debug")("prerendercloudserver");
+
+const FILE_NAME = "_redirects";
 
 const starPathToRegex = (starPath) =>
   new RegExp(`${starPath}`.replace(/\*/, "(.*)"));
@@ -59,7 +63,7 @@ function handleRedirect(req, res, next) {
   if (!foundRedirect) return next();
 
   if (`${foundRedirect.status}`.startsWith(3)) {
-    console.log("redirecting", {
+    debug("redirecting", {
       from: req.url,
       to: foundRedirect.to,
       status: foundRedirect.status,
@@ -69,7 +73,7 @@ function handleRedirect(req, res, next) {
     const to = foundRedirect.to;
 
     if (to.startsWith("http")) {
-      console.log("streaming", {
+      debug("streaming", {
         from: req.url,
         to: foundRedirect.to,
       });
@@ -80,7 +84,7 @@ function handleRedirect(req, res, next) {
       req.pipe(stream);
       return stream.pipe(res);
     } else {
-      console.log("rewriting", {
+      debug("rewriting", {
         from: req.url,
         to: foundRedirect.to,
         status: foundRedirect.status,
@@ -96,14 +100,17 @@ function handleRedirect(req, res, next) {
   }
 }
 
-module.exports = function () {
+module.exports = function (directory) {
+  const filePath = stdlibPath.resolve(directory, FILE_NAME);
+
   let redirects = [];
 
   try {
-    redirects = Redirects.from(fs.readFileSync("_redirects").toString());
+    redirects = Redirects.from(fs.readFileSync(filePath).toString());
   } catch (err) {
     if (err.message.match("ENOENT")) {
       console.log("no _redirects file was detected");
+      return null;
     } else {
       throw err;
     }
@@ -113,9 +120,9 @@ module.exports = function () {
       Redirects.isSplat(redirect) ? splatRedirectWithRegex(redirect) : redirect
     );
     console.log(
-      "\n---\n_redirects file successfully parsed",
+      `\n---\n\n${FILE_NAME} file successfully parsed`,
       redirects,
-      "\n---\n"
+      "\n\n---\n"
     );
   }
 

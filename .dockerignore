@@ -1,0 +1,6 @@
+# Ignore everything
+*
+
+# https://kevinpollet.dev/posts/how-to-use-your-dockerignore-as-a-whitelist/#use-your-dockerignore-as-a-whitelist
+# Allow files and folders with a pattern starting with !
+!publish/**/*
