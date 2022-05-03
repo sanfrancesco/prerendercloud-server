@@ -113,16 +113,26 @@ s3://my-s3-bucket \
 
 #### Options
 
+Read more about these options here: https://github.com/sanfrancesco/prerendercloud-nodejs
+
 * `--help`
 * `--debug`
 * `--enable-middleware-cache`
   * a local in-memory cache that does not expire (reboot to clear cache) to avoid hitting service.prerender.cloud on every request
+* `--meta-only`
+  * when you only want to pre-render the `<head />` (useful if all you care about is open graph and meta tags)
+* `--bots-only`
+* `--ignore-all-query-params`
+* `--remove-trailing-slash`
 * `--disable-ajax-preload`
 * `--disable-ajax-bypass`
 * `--disable-head-dedupe`
-* `--ignore-all-query-params`
-* `--meta-only`
-* `--bots-only`
+* `--remove-script-tags`
+* `--wait-extra-long`
+* `--follow-redirects`
+* `--bubble-up-5xx-errors`
+* `--throttle-on-fail`
+
 
 
 #### More Examples
