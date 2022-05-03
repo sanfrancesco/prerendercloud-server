@@ -17,7 +17,7 @@ PORT=9000 prerendercloud-server dist
 # e.g. 2 if you have a VPS, something like: `ssh user@www.myremotehost.com -R 9000:localhost:9000`
 ```
 
-A pushstate Node.js http server that includes the [official prerender.cloud middleware](https://github.com/sanfrancesco/prerendercloud-nodejs) for server-side rendering your single-page JavaScript application (React, Angular, Ember, Preact, Vue, etc.)
+A pushstate Node.js http server that includes the [official prerender.cloud middleware](https://github.com/sanfrancesco/prerendercloud-nodejs) for server-side rendering (also known as pre-rendering or dynamic rendering) your single-page JavaScript application (React, Angular, Ember, Preact, Vue, etc.)
 
 Designed to be an all-in-one hosting + server-side rendering solution for single-page JavaScript apps needing pre-rendering or a generic solution to server-side rendering. Run it from Node.js or as a Docker container.
 
