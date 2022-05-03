@@ -21,7 +21,7 @@ Read all documentation here: https://www.prerender.cloud/docs and read more abou
 
 #### Fly.io example
 
-Fly.io is a modern app deployment platform that can run Dockerfiles and is a painless way to run prerendercloud-server.
+[Fly.io](https://fly.io/) is a modern app deployment platform that can run Dockerfiles and is a painless way to run prerendercloud-server.
 
 See fly-io in the [examples directory](examples/fly-io/README.md)
 
