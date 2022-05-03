@@ -1,5 +1,3 @@
-"use strict";
-
 // https://stackoverflow.com/a/50484916
 // eslint-disable-next-line
 const S3_BUCKET_REGEX =
@@ -23,7 +21,6 @@ const DIRECTORY = "public";
 const FILE = "index.html";
 const HOST = "0.0.0.0";
 
-const consolePrinter = require("./lib/console-printer");
 const sanityCheck = require("./lib/sanity-check");
 
 const configureS3Proxy = require("./lib/configure-s3-proxy");
@@ -31,11 +28,11 @@ const configureS3Proxy = require("./lib/configure-s3-proxy");
 exports.start = function (options, _onStarted) {
   options = options || {};
 
-  let port = options.port || process.env.PORT || PORT;
-  let directory = options.directory || DIRECTORY;
-  let file = FILE;
-  let host = options.host || HOST;
-  let onStarted = _onStarted || function () {};
+  const port = options.port || process.env.PORT || PORT;
+  const directory = options.directory || DIRECTORY;
+  const file = FILE;
+  const host = options.host || HOST;
+  const onStarted = _onStarted || function () {};
 
   let s3Bucket = null;
 
@@ -56,7 +53,7 @@ exports.start = function (options, _onStarted) {
   }
 
   if (options.debug) {
-    process.env["DEBUG"] = "prerendercloud";
+    process.env["DEBUG"] = "prerendercloud,prerendercloudserver";
   }
 
   const prerendercloud = require("prerendercloud");
@@ -94,6 +91,7 @@ exports.start = function (options, _onStarted) {
         console.log("ignoring all query params");
         prerendercloud.set("whitelistQueryParams", (req) => []);
       } else if (key === "--meta-only") {
+        console.log("enabling", key);
         prerendercloud.set(optionsMap[key], () => true);
       } else {
         console.log("enabling", key);
@@ -103,21 +101,33 @@ exports.start = function (options, _onStarted) {
   });
 
   if (!options["--enable-middleware-cache"]) {
-    consolePrinter(
-      "Warning: middleware-cache is not enabled, which means every page refresh will hit the prerender.cloud API, adding ~1.5s to each request. After verifying that things are working, use --enable-middleware-cache to speed things up\n",
-      4
+    console.log("");
+    console.log(
+      "Warning: middleware-cache is not enabled, which means every page refresh will hit the prerender.cloud API, adding ~1.5s to each request. After verifying that things are working, use --enable-middleware-cache to speed things up\n"
     );
+    console.log("");
   }
+
+  app.use((req, res, next) => {
+    if (req.url === "/_redirects" || req.url === "/_whitelist.js") {
+      res.statusCode = 404;
+      return res.end("not found");
+    } else {
+      return next();
+    }
+  });
 
   app.use(compression());
 
   app.use(prerendercloud);
 
-  // 1. check for redirects
-  app.use(createRedirectsMiddleware());
+  const parseWhitelist = require("./lib/whitelist");
+  const whitelist = parseWhitelist(directory);
 
-  // 2. check s3 if using s3, else filesystem
   if (s3Bucket) {
+    // TODO: implement whitelist and redirects for s3 proxy
+    //       1. either read from s3 bucket or
+    //       2. specify separate option to read the files from
     configureS3Proxy(
       app,
       s3Bucket,
@@ -125,6 +135,11 @@ exports.start = function (options, _onStarted) {
       process.env.AWS_SECRET_KEY
     );
   } else {
+    if (whitelist) {
+      prerendercloud.set("whitelistPaths", (req) => whitelist);
+    }
+    app.use(createRedirectsMiddleware(directory));
+
     app.use(
       serveStatic(directory, {
         extensions: ["html"],

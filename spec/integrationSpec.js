@@ -3,7 +3,7 @@ const supertest = require("supertest");
 
 const server = require("../src/index.js");
 const requestWithSupertest = supertest(
-  server.start({ directory: "./htmltest/public", "--bots-only": true })
+  server.start({ directory: "./spec/htmltest/public", "--bots-only": true })
 );
 
 const INDEX_HTML_RAW_SOURCE =
@@ -41,6 +41,30 @@ describe("root", function () {
     });
   });
 
+  describe("_whitelist.js and _redirects", function () {
+    function it404s() {
+      it("returns 404", async function () {
+        const res = await requestWithSupertest
+          .get(this.requestedPath)
+          .set("user-agent", this.userAgent);
+
+        expect(res.status).toEqual(404);
+        expect(res.text).toEqual("not found");
+      });
+    }
+
+    [{ path: "/_redirects", ua: "prerendercloud" }].forEach(function (args) {
+      describe("with prerender user-agent", function () {
+        beforeEach(function () {
+          this.requestedPath = args.path;
+          this.userAgent = args.ua;
+        });
+
+        it404s();
+      });
+    });
+  });
+
   describe("when user-agent is a bot", function () {
     beforeEach(function () {
       this.userAgent = "twitterbot";
@@ -55,6 +79,32 @@ describe("root", function () {
 
       expect(res.status).toEqual(200);
       expect(res.text).toEqual("body");
+    });
+
+    describe("when path not in whitelist", function () {
+      it("does not pre-render", async function () {
+        const res = await requestWithSupertest
+          .get("/not-in-whitelist")
+          .set("user-agent", this.userAgent);
+
+        expect(res.status).toEqual(200);
+        expect(res.text).toEqual(INDEX_HTML_RAW_SOURCE);
+      });
+    });
+
+    describe("when path matches regex in whitelist", function () {
+      it("does not pre-render", async function () {
+        const res = await requestWithSupertest
+          .get("/users/1234/profile")
+          .set("user-agent", this.userAgent);
+
+        expect(this.prerenderedUri).toEqual(
+          "/http://127.0.0.1:9000/users/1234/profile"
+        );
+
+        expect(res.status).toEqual(200);
+        expect(res.text).toEqual("body");
+      });
     });
   });
 
