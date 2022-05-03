@@ -7,14 +7,14 @@
 https://www.prerender.cloud/
 
 ```bash
+# simplest possible example if your built SPA is in a dir named `dist`
 npm install -g prerendercloud-server
 PORT=9000 prerendercloud-server dist
 
 # now serving your JavaScript single-page app at localhost:9000
-# note: if running from your dev machine (localhost) start a reverse tunnel to get a public IP:
+# if running from your dev machine (localhost) start a reverse tunnel to get a public IP:
 # e.g. 1 if you have ngrok.com account: `ngrok http 9000`
 # e.g. 2 if you have a VPS, something like: `ssh user@www.myremotehost.com -R 9000:localhost:9000`
-
 ```
 
 A pushstate Node.js http server that includes the [official prerender.cloud middleware](https://github.com/sanfrancesco/prerendercloud-nodejs) for server-side rendering your single-page JavaScript application (React, Angular, Ember, Preact, Vue, etc.)
