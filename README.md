@@ -21,31 +21,97 @@ A pushstate Node.js http server that includes the [official prerender.cloud midd
 
 Designed to be an all-in-one hosting + server-side rendering solution for single-page JavaScript apps needing pre-rendering or a generic solution to server-side rendering. Run it from Node.js or as a Docker container.
 
-## Requirements
+### Requirements
 
 - index.html at the root of the deployed project
 - pushstate URLs
 - React, Preact, Angular, Ember, Vue, or any SPA framework that rewrites a container DOM element (Angular users must use templates)
 
-Note: this package disables prerender.cloud's server cache and requires you to opt-in to local caching. The consequence of this default config is every request to this server will be forwarded to service.prerener.cloud AND trigger a \~1.5s render. Why? Because this default config is useful for initial debugging. After things are working and you're deploying to production use `--enable-middleware-cache` and reboot this process when you need to clear that local cache (i.e. you need freshly pre-rendered pages)
+#### Notes on caching and pre-rendering lifecyle
+
+By default, this package has *no* "API request caching" enabled (it does have etags for static files). This means 100% of requests will be forwarded and processed by prerender.cloud's API (service.prerender.cloud). This is the ideal configuration while you're getting things working, but not for production.
+
+Once your app is pre-rendering as you expect, and you're ready to "go to production", use the `--enable-middleware-cache` option. This is an in-memory cache of the responses from requests made to the service.prerender.cloud API. Note, there is also a "server cache" available from prerender.cloud but that is disabled here as a best practice (caching locally via middleware cache is free to you, but using the prerender.cloud server cache costs money).
+
+Simply restart and/or deploy this process to clear that in-memory cache.
+
+Pages are pre-rendered "on-demand", also known as "lazy loading". So if you visit `/docs`, that request will block until the pre-render is complete. If `--enable-middleware-cache` is set, then subsequent requests to `/docs` will come from your local cache (until the process is rebooted or the cache expires).
+
+If you'd like to restrict pre-rendered content to "bots only", use the `--bots-only` config. See the [list of bots here](https://github.com/sanfrancesco/prerendercloud-nodejs/blob/f41a3bd3eef7f20e64409a86f89801acf34e87e2/source/index.js#L45-L76).
+
+If you'd like to restrict which pages are valid for pre-rendering, see the `_whitelist.js` config below. If you have a busy site, this is an important feature to enable to prevent abusive bots from spamming random URLs that may not actually exist causing needless requests to be made to service.prerender.cloud.
 
 Read all documentation here: https://www.prerender.cloud/docs and read more about the config options here: https://github.com/sanfrancesco/prerendercloud-nodejs
 
 <!-- MarkdownTOC autolink="true" -->
 
+- [Plain old Node.js examples](#plain-old-nodejs-examples)
+- [Plain old Node.js local filesystem example](#plain-old-nodejs-local-filesystem-example)
+- [Plain old Node.js S3 proxy example](#plain-old-nodejs-s3-proxy-example)
 - [Fly.io example](#flyio-example)
 - [Docker local filesystem example](#docker-local-filesystem-example)
 - [Docker S3 proxy example](#docker-s3-proxy-example)
-- [Plain old Node.js example](#plain-old-nodejs-example)
-- [Plain old Node.js local filesystem example](#plain-old-nodejs-local-filesystem-example)
-- [Plain old Node.js S3 proxy example](#plain-old-nodejs-s3-proxy-example)
 - [Environment variables](#environment-variables)
-- [Options](#options)
-- [More Examples](#more-examples)
+- [CLI Options](#cli-options)
+- [CLI Env vars](#cli-env-vars)
 - [The `_whitelist.js` file](#the-_whitelistjs-file)
 - [The `_redirects` file](#the-_redirects-file)
 
 <!-- /MarkdownTOC -->
+
+#### Plain old Node.js examples
+
+```bash
+npm install -g prerendercloud-server
+```
+
+now navigate to your project directory (unless you're using S3, in which case it doesn't matter)
+
+**usage:** `prerendercloud-server [options] [LocalPath or S3Uri]`
+
+```bash
+# start the server in the current directory
+prerendercloud-server
+
+# start the server for the dist directory
+prerendercloud-server dist
+
+# start the server for the dist directory and run it on PORT 9000
+PORT=9000 prerendercloud-server dist
+
+# start the server for the dist directory and run it on PORT 9000 and use the local cache
+# (the cache won't expire until you terminate this node instance)
+PORT=9000 prerendercloud-server dist --enable-middleware-cache
+
+# start the server in the current directory with your API token
+# from https://www.prerender.cloud to avoid rate limits
+PRERENDER_TOKEN=my-secret-token prerendercloud-server
+```
+
+#### Plain old Node.js local filesystem example
+
+```
+PRERENDER_TOKEN="my-secret-token" \
+prerendercloud-server . \
+--enable-middleware-cache \
+--disable-ajax-preload \
+--disable-ajax-bypass \
+--bots-only
+```
+
+#### Plain old Node.js S3 proxy example
+
+```
+AWS_ACCESS_KEY="my-aws-key" \
+-e AWS_SECRET_KEY="my-aws-secret" \
+-e PRERENDER_TOKEN="my-secret-token" \
+prerendercloud-server \
+s3://my-s3-bucket \
+--enable-middleware-cache \
+--disable-ajax-preload \
+--disable-ajax-bypass \
+--bots-only
+```
 
 #### Fly.io example
 
@@ -95,43 +161,6 @@ docker run \
   --bots-only
 ```
 
-#### Plain old Node.js example
-
-```
-npm install -g prerendercloud-server
-```
-
-now navigate to your project directory (unless you're using S3, in which case it doesn't matter)
-
-```
-usage: prerendercloud-server [options] [LocalPath or S3Uri]
-```
-
-#### Plain old Node.js local filesystem example
-
-```
-PRERENDER_TOKEN="my-secret-token" \
-prerendercloud-server . \
---enable-middleware-cache \
---disable-ajax-preload \
---disable-ajax-bypass \
---bots-only
-```
-
-#### Plain old Node.js S3 proxy example
-
-```
-AWS_ACCESS_KEY="my-aws-key" \
--e AWS_SECRET_KEY="my-aws-secret" \
--e PRERENDER_TOKEN="my-secret-token" \
-prerendercloud-server \
-s3://my-s3-bucket \
---enable-middleware-cache \
---disable-ajax-preload \
---disable-ajax-bypass \
---bots-only
-```
-
 #### Environment variables
 
 - `PORT`
@@ -139,12 +168,13 @@ s3://my-s3-bucket \
   - without this, you'll be rate limited. Sign up at https://www.prerender.cloud
 - `MIDDLEWARE_CACHE_MAX_MEGABYTES=1000` (defaults to 500MB, only relevant with --enable-middleware-cache)
 
-#### Options
+#### CLI Options
 
 Read more about these options here: https://github.com/sanfrancesco/prerendercloud-nodejs
 
 - `--help`
 - `--debug`
+  - verbose debugging
 - `--enable-middleware-cache`
   - a local in-memory cache that does not expire (reboot to clear cache) to avoid hitting service.prerender.cloud on every request
 - `--meta-only`
@@ -157,38 +187,25 @@ Read more about these options here: https://github.com/sanfrancesco/prerenderclo
 - `--disable-head-dedupe`
 - `--remove-script-tags`
 - `--wait-extra-long`
+  - if the pre-rendering process finished too early
 - `--follow-redirects`
 - `--bubble-up-5xx-errors`
 - `--throttle-on-fail`
+- `--crawl-whitelist-on-boot`
+  - requires a `_whitelist.js` file to exist in wwwroot and `CRAWL_HOST` env var to be set, e.g. `CRAWL_HOST=example.com` (no protocol, no slashes)
+  - use this with `--enable-middleware-cache` so visitors don't have to wait for the lazily loaded pre-rendering to finish
 
-#### More Examples
+#### CLI Env vars
 
-```
-# start the server in the current directory
-prerendercloud-server
-```
-
-```
-# start the server for the dist directory
-prerendercloud-server dist
-```
-
-```
-# start the server for the dist directory and run it on PORT 9000
-PORT=9000 prerendercloud-server dist
-```
-
-```
-# start the server for the dist directory and run it on PORT 9000 and use the local cache
-# (the cache won't expire until you terminate this node instance)
-PORT=9000 prerendercloud-server dist --enable-middleware-cache
-```
-
-```
-# start the server in the current directory with your API token
-# from https://www.prerender.cloud to avoid rate limits
-PRERENDER_TOKEN=my-secret-token prerendercloud-server
-```
+- `PRERENDER_TOKEN` - set this to your API token that you get from https://www.prerender.cloud/
+- `PORT` - default 9000
+- `MIDDLEWARE_CACHE_MAX_MEGABYTES` - used with `--enable-middleware-cache`, default is 500MB
+- `CANONICAL_HOST` - if exists, requests made to the server from a non-matching host header will redirect to canonical.
+  - most common use case: configure your DNS to point apex and www to `example.com`, set `CANONICAL_HOST=example.com`, and requests to www.example.com will redirect to apex
+  - override the header used to detect host with `HOST_HEADER` (defaults to `host`, if on AWS behind ALB, set `HOST_HEADER=x-forwarded-proto`)
+- `CRAWL_HOST` - if using `--crawl-whitelist-on-boot`, e.g. `CRAWL_HOST=example.com` (no protocol, no slashes)
+  - use with `CRAWL_DELAY_SECONDS` to give your process enough time to boot and go live (35s is a safe/common value)
+- `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` if using s3 proxy
 
 #### The `_whitelist.js` file
 

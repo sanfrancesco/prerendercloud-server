@@ -13,6 +13,7 @@ const optionsMap = {
   "--follow-redirects": "followRedirects",
   "--bubble-up-5xx-errors": "bubbleUp5xxErrors",
   "--throttle-on-fail": "throttleOnFail",
+  "--crawl-whitelist-on-boot": "--crawl-whitelist-on-boot",
 };
 
 module.exports = optionsMap;

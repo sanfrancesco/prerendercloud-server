@@ -61,6 +61,10 @@ exports.start = function (options, _onStarted) {
 
   const optionsMap = require("./lib/options");
   Object.keys(optionsMap).forEach((key) => {
+    if (key === "--debug" || key === "--crawl-whitelist-on-boot") {
+      return;
+    }
+
     if (options[key]) {
       if (key === "--enable-middleware-cache") {
         console.log("middleware cache enabled");
@@ -108,7 +112,20 @@ exports.start = function (options, _onStarted) {
     console.log("");
   }
 
+  // AWS ALB uses "x-forwarded-proto"
+  const HOST_HEADER = process.env.HOST_HEADER || "host";
+  const CANONICAL_HOST = process.env.CANONICAL_HOST;
+
   app.use((req, res, next) => {
+    const actualHost = req.headers[HOST_HEADER];
+    if (CANONICAL_HOST && actualHost && actualHost !== CANONICAL_HOST) {
+      const location = `https://${CANONICAL_HOST}${req.url}`;
+      console.log("redirecting", `https://${actualHost}${req.url}`, location);
+
+      res.writeHead(301, { location });
+      return res.end();
+    }
+
     if (req.url === "/_redirects" || req.url === "/_whitelist.js") {
       res.statusCode = 404;
       return res.end("not found");
@@ -159,6 +176,26 @@ exports.start = function (options, _onStarted) {
   const server = app.listen(port, host, (err) =>
     onStarted(err, server.address())
   );
+
+  if (
+    whitelist &&
+    options["--crawl-whitelist-on-boot"] &&
+    process.env.CRAWL_HOST
+  ) {
+    const p = () =>
+      require("./lib/crawl-whitelist")(process.env.CRAWL_HOST, whitelist).then(
+        (results) => {
+          console.log("done crawling", results);
+          return server;
+        }
+      );
+
+    if (!process.env.CRAWL_DELAY_SECONDS) {
+      return p();
+    }
+
+    setTimeout(() => p(), parseInt(process.env.CRAWL_DELAY) * 1000);
+  }
 
   return server;
 };

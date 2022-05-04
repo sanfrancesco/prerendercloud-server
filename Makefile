@@ -3,11 +3,18 @@
 prettier:
 	./node_modules/.bin/prettier --write "src/**/*.js"
 
-test:
+testcrawl:
+	NODE_ENV=test \
+	CRAWL_HOST="example.com" \
+	./node_modules/jasmine/bin/jasmine.js spec/crawlSpec.js
+
+testintegration:
 	DEBUG=prerendercloud,prerendercloudserver \
 	NODE_ENV=test \
 	PRERENDER_SERVICE_URL="https://service.prerender.cloud" \
-	./node_modules/jasmine/bin/jasmine.js
+	./node_modules/jasmine/bin/jasmine.js spec/integrationSpec.js
+
+test: testcrawl testintegration
 
 build: prettier
 	npm run build
@@ -21,9 +28,9 @@ publish: build
 	npm publish publish
 
 dockerbuild: build
-	docker build -t prerendercloud/webserver:latest .
-	docker build -t prerendercloud/webserver:0.8.2 .
+	docker build -t prerendercloud/webserver -t prerendercloud/webserver:latest -t prerendercloud/webserver:0.8.3 .
 
 dockerpush:
+	docker push prerendercloud/webserver
 	docker push prerendercloud/webserver:latest
-	docker push prerendercloud/webserver:0.8.2
+	docker push prerendercloud/webserver:0.8.3

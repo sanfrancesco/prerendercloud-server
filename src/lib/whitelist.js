@@ -15,6 +15,10 @@ module.exports = function (directory) {
           `${FILE_NAME} must be array of regex or string. Found non-regex, non-string: ${path}`
         );
       }
+
+      if (typeof path === "string" && !path.startsWith("/")) {
+        throw new Error(`${FILE_NAME} string paths must start with a slash: /`);
+      }
     });
 
     if (whitelistedPaths.length) {
