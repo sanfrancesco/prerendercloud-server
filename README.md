@@ -29,7 +29,7 @@ Designed to be an all-in-one hosting + server-side rendering solution for single
 
 #### Notes on caching and pre-rendering lifecyle
 
-By default, this package has *no* "API request caching" enabled (it does have etags for static files). This means 100% of requests will be forwarded and processed by prerender.cloud's API (service.prerender.cloud). This is the ideal configuration while you're getting things working, but not for production.
+By default, this package has _no_ "API request caching" enabled (it does have etags for static files). This means 100% of requests will be forwarded and processed by prerender.cloud's API (service.prerender.cloud). This is the ideal configuration while you're getting things working, but not for production.
 
 Once your app is pre-rendering as you expect, and you're ready to "go to production", use the `--enable-middleware-cache` option. This is an in-memory cache of the responses from requests made to the service.prerender.cloud API. Note, there is also a "server cache" available from prerender.cloud but that is disabled here as a best practice (caching locally via middleware cache is free to you, but using the prerender.cloud server cache costs money).
 
@@ -52,8 +52,7 @@ Read all documentation here: https://www.prerender.cloud/docs and read more abou
 - [Docker local filesystem example](#docker-local-filesystem-example)
 - [Docker S3 proxy example](#docker-s3-proxy-example)
 - [Environment variables](#environment-variables)
-- [CLI Options](#cli-options)
-- [CLI Env vars](#cli-env-vars)
+- [Options](#options)
 - [The `_whitelist.js` file](#the-_whitelistjs-file)
 - [The `_redirects` file](#the-_redirects-file)
 
@@ -163,12 +162,17 @@ docker run \
 
 #### Environment variables
 
-- `PORT`
-- `PRERENDER_TOKEN`
-  - without this, you'll be rate limited. Sign up at https://www.prerender.cloud
-- `MIDDLEWARE_CACHE_MAX_MEGABYTES=1000` (defaults to 500MB, only relevant with --enable-middleware-cache)
+- `PORT` - default 9000
+- `PRERENDER_TOKEN` - need this avoid rate limiting, get an API token from https://www.prerender.cloud/
+- `MIDDLEWARE_CACHE_MAX_MEGABYTES` - used with `--enable-middleware-cache`, default is 500
+- `CANONICAL_HOST` - if exists, requests made to the server from a non-matching host header will redirect to canonical.
+  - most common use case: configure your DNS to point apex and www to `example.com`, set `CANONICAL_HOST=example.com`, and requests to www.example.com will redirect to apex
+  - override the header used to detect host with `HOST_HEADER` (defaults to `host`, if on AWS behind ALB, set `HOST_HEADER=x-forwarded-proto`)
+- `CRAWL_HOST` - if using `--crawl-whitelist-on-boot`, e.g. `CRAWL_HOST=example.com` (no protocol, no slashes)
+  - use with `CRAWL_DELAY_SECONDS` to give your process enough time to boot and go live (35s is a safe/common value)
+- `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` if using s3 proxy
 
-#### CLI Options
+#### Options
 
 Read more about these options here: https://github.com/sanfrancesco/prerendercloud-nodejs
 
@@ -194,18 +198,6 @@ Read more about these options here: https://github.com/sanfrancesco/prerenderclo
 - `--crawl-whitelist-on-boot`
   - requires a `_whitelist.js` file to exist in wwwroot and `CRAWL_HOST` env var to be set, e.g. `CRAWL_HOST=example.com` (no protocol, no slashes)
   - use this with `--enable-middleware-cache` so visitors don't have to wait for the lazily loaded pre-rendering to finish
-
-#### CLI Env vars
-
-- `PRERENDER_TOKEN` - set this to your API token that you get from https://www.prerender.cloud/
-- `PORT` - default 9000
-- `MIDDLEWARE_CACHE_MAX_MEGABYTES` - used with `--enable-middleware-cache`, default is 500MB
-- `CANONICAL_HOST` - if exists, requests made to the server from a non-matching host header will redirect to canonical.
-  - most common use case: configure your DNS to point apex and www to `example.com`, set `CANONICAL_HOST=example.com`, and requests to www.example.com will redirect to apex
-  - override the header used to detect host with `HOST_HEADER` (defaults to `host`, if on AWS behind ALB, set `HOST_HEADER=x-forwarded-proto`)
-- `CRAWL_HOST` - if using `--crawl-whitelist-on-boot`, e.g. `CRAWL_HOST=example.com` (no protocol, no slashes)
-  - use with `CRAWL_DELAY_SECONDS` to give your process enough time to boot and go live (35s is a safe/common value)
-- `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` if using s3 proxy
 
 #### The `_whitelist.js` file
 
