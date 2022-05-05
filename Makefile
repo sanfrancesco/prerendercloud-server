@@ -23,14 +23,21 @@ build: prettier
 	cp -r dist publish/
 	cp README.md package.json package-lock.json publish/
 
-# following https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/ for transpiled npm packages
-publish: build
+npmpublish: build
 	npm publish publish
 
 dockerbuild: build
-	docker build -t prerendercloud/webserver -t prerendercloud/webserver:latest -t prerendercloud/webserver:0.8.3 .
+	docker build -t prerendercloud/webserver -t prerendercloud/webserver:latest -t prerendercloud/webserver:0.8.4 .
 
-dockerpush:
+dockerpush: dockerbuild
 	docker push prerendercloud/webserver
 	docker push prerendercloud/webserver:latest
-	docker push prerendercloud/webserver:0.8.3
+	docker push prerendercloud/webserver:0.8.4
+
+# instructions to publish npm and docker:
+# 1. run tests, commit changes
+# 2. modify package.json version
+# 3. modify Docker tag here in Makefile in dockerbuild and dockerpublish
+# 4. run `make publish`
+# 5. run `make dockerpush`
+publish: npmpublish dockerpush

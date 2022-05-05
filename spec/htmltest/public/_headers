@@ -1,0 +1,5 @@
+/plain-txt-file
+  content-type: text/plain
+
+/doc*
+  arbitrary-header: arbitrary-value

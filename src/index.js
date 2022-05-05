@@ -15,6 +15,7 @@ const serveStaticFile = require("connect-static-file");
 const compression = require("compression");
 const app = connect();
 const createRedirectsMiddleware = require("./lib/create-redirects-middleware");
+const createHeadersMiddleware = require("./lib/create-headers-middleware");
 
 const PORT = 9000;
 const DIRECTORY = "public";
@@ -155,7 +156,16 @@ exports.start = function (options, _onStarted) {
     if (whitelist) {
       prerendercloud.set("whitelistPaths", (req) => whitelist);
     }
-    app.use(createRedirectsMiddleware(directory));
+
+    const redirectsMiddleware = createRedirectsMiddleware(directory);
+    if (redirectsMiddleware) {
+      app.use(redirectsMiddleware);
+    }
+
+    const headersMiddleware = createHeadersMiddleware(directory);
+    if (headersMiddleware) {
+      app.use(headersMiddleware);
+    }
 
     app.use(
       serveStatic(directory, {
@@ -194,7 +204,7 @@ exports.start = function (options, _onStarted) {
       return p();
     }
 
-    setTimeout(() => p(), parseInt(process.env.CRAWL_DELAY) * 1000);
+    setTimeout(() => p(), parseInt(process.env.CRAWL_DELAY_SECONDS) * 1000);
   }
 
   return server;
