@@ -194,7 +194,7 @@ exports.start = function (options, _onStarted) {
       return p();
     }
 
-    setTimeout(() => p(), parseInt(process.env.CRAWL_DELAY) * 1000);
+    setTimeout(() => p(), parseInt(process.env.CRAWL_DELAY_SECONDS) * 1000);
   }
 
   return server;
