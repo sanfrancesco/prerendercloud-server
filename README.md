@@ -55,6 +55,7 @@ Read all documentation here: https://www.prerender.cloud/docs and read more abou
 - [Options](#options)
 - [The `_whitelist.js` file](#the-_whitelistjs-file)
 - [The `_redirects` file](#the-_redirects-file)
+- [The `_headers` file](#the-_headers-file)
 
 <!-- /MarkdownTOC -->
 
@@ -267,4 +268,29 @@ In other words, some additional control over routing logic.
 
 ```
 /documentation /docs 200
+```
+
+#### The `_headers` file
+
+Similar to Netlify's [\_headers file](https://docs.netlify.com/routing/headers/#syntax-for-the-headers-file), this project will parse a `_headers` file in the wwwroot (same place as your index.html).
+
+For setting cache-control headers (i.e. long max-age or immutable), overriding content-type that is normally detected from the filename. In other words, explicit control over the headers returned.
+
+```
+/path/must/start/with-leading-slash-optional-trailing-star*
+  header-key-then-colon: header-value
+```
+
+**Give everything in the fonts dir a long/permanent cache**
+
+```
+/fonts/*
+  Cache-Control: public, max-age=365000000, immutable
+```
+
+**Give a content-type to a path without an extension**
+
+```
+/apple-app-site-association
+  content-type: application/json
 ```

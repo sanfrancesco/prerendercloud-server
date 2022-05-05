@@ -124,6 +124,40 @@ describe("root", function () {
       expect(res.text).toEqual(INDEX_HTML_RAW_SOURCE);
     });
 
+    describe("_headers", function () {
+      it("rewrites static path headers", async function () {
+        const res = await requestWithSupertest
+          .get("/plain-txt-file")
+          .set("user-agent", this.userAgent);
+
+        expect(res.status).toEqual(200);
+        expect(res.headers["content-type"]).toEqual("text/plain");
+        expect(res.text).toEqual("plain txt");
+      });
+      it("rewrites splat path headers", async function () {
+        const res = await requestWithSupertest
+          .get("/documentation")
+          .set("user-agent", this.userAgent);
+
+        expect(res.status).toEqual(200);
+        expect(res.headers["content-type"]).toEqual("text/html; charset=UTF-8");
+        expect(res.headers["arbitrary-header"]).toEqual("arbitrary-value");
+        expect(res.text).toEqual("documentation");
+      });
+    });
+
+    describe("file without extension", function () {
+      it("returns content-type of octet-stream", async function () {
+        const res = await requestWithSupertest
+          .get("/file-no-extension")
+          .set("user-agent", this.userAgent);
+
+        expect(res.status).toEqual(200);
+        expect(res.headers["content-type"]).toEqual("application/octet-stream");
+        expect(res.body.toString()).toEqual("text");
+      });
+    });
+
     describe("_redirects", function () {
       it("rewrites", async function () {
         const res = await requestWithSupertest
