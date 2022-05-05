@@ -4,7 +4,9 @@
 
 ![Github Actions CI](https://github.com/sanfrancesco/prerendercloud-server/actions/workflows/node.js.yml/badge.svg)
 
-https://www.prerender.cloud/
+This package is a Node.js pushstate http server powered by [Headless-Render-API.com](https://headless-render-api.com) (formerly named prerender.cloud from 2016 - 2022). It's also the actual server hosting the headless-render-api.com domain (via fly.io).
+
+Use it for server-side rendering (also known as pre-rendering or dynamic rendering) your single-page JavaScript application (React, Angular, Ember, Preact, Vue, etc.)
 
 ```bash
 # simplest possible example if your built SPA is in a dir named `dist`
@@ -17,9 +19,7 @@ PORT=9000 prerendercloud-server dist
 # e.g. 2 if you have a VPS, something like: `ssh user@www.myremotehost.com -R 9000:localhost:9000`
 ```
 
-A pushstate Node.js http server that includes the [official prerender.cloud middleware](https://github.com/sanfrancesco/prerendercloud-nodejs) for server-side rendering (also known as pre-rendering or dynamic rendering) your single-page JavaScript application (React, Angular, Ember, Preact, Vue, etc.)
-
-Designed to be an all-in-one hosting + server-side rendering solution for single-page JavaScript apps needing pre-rendering or a generic solution to server-side rendering. Run it from Node.js or as a Docker container.
+Designed to be an all-in-one hosting + server-side rendering solution for single-page JavaScript apps needing pre-rendering or a generic solution to server-side rendering. Run it from Node.js or as a Docker container. Based off the [official Headless-Render-API.com middleware](https://github.com/sanfrancesco/prerendercloud-nodejs)
 
 ### Requirements
 
@@ -29,9 +29,9 @@ Designed to be an all-in-one hosting + server-side rendering solution for single
 
 #### Notes on caching and pre-rendering lifecyle
 
-By default, this package has _no_ "API request caching" enabled (it does have etags for static files). This means 100% of requests will be forwarded and processed by prerender.cloud's API (service.prerender.cloud). This is the ideal configuration while you're getting things working, but not for production.
+By default, this package has _no_ "API request caching" enabled (it does have etags for static files). This means 100% of requests will be forwarded and processed by Headless-Render-API.com's API (service.headless-render-api.com). This is the ideal configuration while you're getting things working, but not for production.
 
-Once your app is pre-rendering as you expect, and you're ready to "go to production", use the `--enable-middleware-cache` option. This is an in-memory cache of the responses from requests made to the service.prerender.cloud API. Note, there is also a "server cache" available from prerender.cloud but that is disabled here as a best practice (caching locally via middleware cache is free to you, but using the prerender.cloud server cache costs money).
+Once your app is pre-rendering as you expect, and you're ready to "go to production", use the `--enable-middleware-cache` option. This is an in-memory cache of the responses from requests made to the service.headless-render-api.com API. Note, there is also a "server cache" available from Headless-Render-API.com but that is disabled here as a best practice (caching locally via middleware cache is free to you, but using the Headless-Render-API.com server cache costs money).
 
 Simply restart and/or deploy this process to clear that in-memory cache.
 
@@ -39,9 +39,9 @@ Pages are pre-rendered "on-demand", also known as "lazy loading". So if you visi
 
 If you'd like to restrict pre-rendered content to "bots only", use the `--bots-only` config. See the [list of bots here](https://github.com/sanfrancesco/prerendercloud-nodejs/blob/f41a3bd3eef7f20e64409a86f89801acf34e87e2/source/index.js#L45-L76).
 
-If you'd like to restrict which pages are valid for pre-rendering, see the `_whitelist.js` config below. If you have a busy site, this is an important feature to enable to prevent abusive bots from spamming random URLs that may not actually exist causing needless requests to be made to service.prerender.cloud.
+If you'd like to restrict which pages are valid for pre-rendering, see the `_whitelist.js` config below. If you have a busy site, this is an important feature to enable to prevent abusive bots from spamming random URLs that may not actually exist causing needless requests to be made to service.headless-render-api.com.
 
-Read all documentation here: https://www.prerender.cloud/docs and read more about the config options here: https://github.com/sanfrancesco/prerendercloud-nodejs
+Read all documentation here: https://headless-render-api.com/docs and read more about the config options here: https://github.com/sanfrancesco/prerendercloud-nodejs
 
 <!-- MarkdownTOC autolink="true" -->
 
@@ -84,7 +84,7 @@ PORT=9000 prerendercloud-server dist
 PORT=9000 prerendercloud-server dist --enable-middleware-cache
 
 # start the server in the current directory with your API token
-# from https://www.prerender.cloud to avoid rate limits
+# from https://headless-render-api.com to avoid rate limits
 PRERENDER_TOKEN=my-secret-token prerendercloud-server
 ```
 
@@ -164,7 +164,7 @@ docker run \
 #### Environment variables
 
 - `PORT` - default 9000
-- `PRERENDER_TOKEN` - need this avoid rate limiting, get an API token from https://www.prerender.cloud/
+- `PRERENDER_TOKEN` - need this avoid rate limiting, get an API token from https://headless-render-api.com/
 - `MIDDLEWARE_CACHE_MAX_MEGABYTES` - used with `--enable-middleware-cache`, default is 500
 - `CANONICAL_HOST` - if exists, requests made to the server from a non-matching host header will redirect to canonical.
   - most common use case: configure your DNS to point apex and www to `example.com`, set `CANONICAL_HOST=example.com`, and requests to www.example.com will redirect to apex
@@ -181,7 +181,7 @@ Read more about these options here: https://github.com/sanfrancesco/prerenderclo
 - `--debug`
   - verbose debugging
 - `--enable-middleware-cache`
-  - a local in-memory cache that does not expire (reboot to clear cache) to avoid hitting service.prerender.cloud on every request
+  - a local in-memory cache that does not expire (reboot to clear cache) to avoid hitting service.headless-render-api.com on every request
 - `--meta-only`
   - when you only want to pre-render the `<head />` (useful if all you care about is open graph and meta tags)
 - `--bots-only`
