@@ -27,12 +27,12 @@ npmpublish: build
 	npm publish publish
 
 dockerbuild: build
-	docker build -t prerendercloud/webserver -t prerendercloud/webserver:latest -t prerendercloud/webserver:0.8.4 .
+	docker build -t prerendercloud/webserver -t prerendercloud/webserver:latest -t prerendercloud/webserver:0.8.5 .
 
 dockerpush: dockerbuild
 	docker push prerendercloud/webserver
 	docker push prerendercloud/webserver:latest
-	docker push prerendercloud/webserver:0.8.4
+	docker push prerendercloud/webserver:0.8.5
 
 # instructions to publish npm and docker:
 # 1. run tests, commit changes
