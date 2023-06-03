@@ -134,6 +134,28 @@ exports.start = function (options, _onStarted) {
   const parseWhitelist = require("./lib/whitelist");
   const whitelist = parseWhitelist(directory);
 
+  const crawlAtBootEnabled =
+    whitelist && options["--crawl-whitelist-on-boot"] && process.env.CRAWL_HOST;
+  const parsedCrawlDelaySeconds =
+    crawlAtBootEnabled && parseInt(process.env.CRAWL_DELAY_SECONDS);
+  const bootedAt = Date.now();
+
+  if (parsedCrawlDelaySeconds && parsedCrawlDelaySeconds > 0) {
+    let isEnabled = false;
+    prerendercloud.set("shouldPrerenderAdditionalCheck", function (req) {
+      isEnabledWas = isEnabled;
+      isEnabled =
+        new Date() > new Date(bootedAt + parsedCrawlDelaySeconds * 1000);
+      if (isEnabled && !isEnabledWas) {
+        console.log(
+          "first pre-rendering request since crawl delay was enabled, proceeding"
+        );
+      }
+
+      return isEnabled;
+    });
+  }
+
   if (s3Bucket) {
     // TODO: implement whitelist and redirects for s3 proxy
     //       1. either read from s3 bucket or
@@ -179,11 +201,7 @@ exports.start = function (options, _onStarted) {
     onStarted(err, server.address())
   );
 
-  if (
-    whitelist &&
-    options["--crawl-whitelist-on-boot"] &&
-    process.env.CRAWL_HOST
-  ) {
+  if (crawlAtBootEnabled) {
     const p = () =>
       require("./lib/crawl-whitelist")(process.env.CRAWL_HOST, whitelist).then(
         (results) => {
@@ -192,11 +210,22 @@ exports.start = function (options, _onStarted) {
         }
       );
 
-    if (!process.env.CRAWL_DELAY_SECONDS) {
+    if (!parsedCrawlDelaySeconds || parsedCrawlDelaySeconds <= 0) {
       return p();
     }
+    console.log(
+      "NOTICE: CRAWL_DELAY_SECONDS configured, waiting",
+      parsedCrawlDelaySeconds,
+      "seconds before crawling"
+    );
 
-    setTimeout(() => p(), parseInt(process.env.CRAWL_DELAY_SECONDS) * 1000);
+    const buffer = 1000;
+    const delayMs = parsedCrawlDelaySeconds * 1000 + buffer;
+    setTimeout(() => {
+      console.log("CRAWL_DELAY_SECONDS elapsed, commencing crawl whitelist");
+
+      p();
+    }, delayMs);
   }
 
   if (!options["--enable-middleware-cache"]) {
