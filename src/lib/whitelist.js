@@ -32,7 +32,7 @@ module.exports = function (directory) {
     return whitelistedPaths;
   } catch (err) {
     if (err.message.match(/Cannot find module/i)) {
-      console.log(`${FILE_NAME} was not found (searched at ${filePath})`);
+      console.log(` - ${FILE_NAME} was not found (searched at ${filePath})`);
     } else {
       throw err;
     }

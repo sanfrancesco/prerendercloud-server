@@ -14,7 +14,9 @@ module.exports = function (directory) {
     parsedHeaders = Headers.from(fs.readFileSync(filePath).toString());
   } catch (err) {
     if (err.message.match("ENOENT")) {
-      console.log("no _headers file was detected");
+      console.log(
+        ` - ${FILE_NAME}      was not found (searched at ${filePath})`
+      );
       return null;
     } else {
       throw err;

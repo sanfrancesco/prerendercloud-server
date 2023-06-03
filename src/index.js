@@ -105,14 +105,6 @@ exports.start = function (options, _onStarted) {
     }
   });
 
-  if (!options["--enable-middleware-cache"]) {
-    console.log("");
-    console.log(
-      "Warning: middleware-cache is not enabled, which means every page refresh will hit the prerender.cloud API, adding ~1.5s to each request. After verifying that things are working, use --enable-middleware-cache to speed things up\n"
-    );
-    console.log("");
-  }
-
   // AWS ALB uses "x-forwarded-proto"
   const HOST_HEADER = process.env.HOST_HEADER || "host";
   const CANONICAL_HOST = process.env.CANONICAL_HOST;
@@ -205,6 +197,14 @@ exports.start = function (options, _onStarted) {
     }
 
     setTimeout(() => p(), parseInt(process.env.CRAWL_DELAY_SECONDS) * 1000);
+  }
+
+  if (!options["--enable-middleware-cache"]) {
+    console.log(
+      "\nWARNING: middleware-cache is off, causing 1-3s delay on page refreshes\n" +
+        "        This is desirable during dev and testing while iterating on code\n" +
+        "        but \x1b[1min production, use --enable-middleware-cache\x1b[0m for faster responses"
+    );
   }
 
   return server;

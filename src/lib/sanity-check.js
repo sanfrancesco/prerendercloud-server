@@ -11,7 +11,7 @@ const fileChecksCWD = {
 };
 
 function sanityCheck(dir) {
-  console.log("\nServer root:", stdlibPath.resolve(dir), "\n");
+  console.log("\nServer root:", stdlibPath.resolve(dir));
 
   for (var file in fileChecksCWD) {
     const filePath = stdlibPath.resolve(dir, file);
