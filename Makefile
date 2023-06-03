@@ -23,6 +23,10 @@ build: prettier
 	cp -r dist publish/
 	cp README.md package.json package-lock.json publish/
 
+cibuild:
+	rm -rf publish && mkdir publish && cp -r src/ publish/
+	cp README.md package.json package-lock.json publish/
+
 npmpublish: build
 	npm publish publish
 
