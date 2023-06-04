@@ -105,14 +105,6 @@ exports.start = function (options, _onStarted) {
     }
   });
 
-  if (!options["--enable-middleware-cache"]) {
-    console.log("");
-    console.log(
-      "Warning: middleware-cache is not enabled, which means every page refresh will hit the prerender.cloud API, adding ~1.5s to each request. After verifying that things are working, use --enable-middleware-cache to speed things up\n"
-    );
-    console.log("");
-  }
-
   // AWS ALB uses "x-forwarded-proto"
   const HOST_HEADER = process.env.HOST_HEADER || "host";
   const CANONICAL_HOST = process.env.CANONICAL_HOST;
@@ -141,6 +133,28 @@ exports.start = function (options, _onStarted) {
 
   const parseWhitelist = require("./lib/whitelist");
   const whitelist = parseWhitelist(directory);
+
+  const crawlAtBootEnabled =
+    whitelist && options["--crawl-whitelist-on-boot"] && process.env.CRAWL_HOST;
+  const parsedCrawlDelaySeconds =
+    crawlAtBootEnabled && parseInt(process.env.CRAWL_DELAY_SECONDS);
+  const bootedAt = Date.now();
+
+  if (parsedCrawlDelaySeconds && parsedCrawlDelaySeconds > 0) {
+    let isEnabled = false;
+    prerendercloud.set("shouldPrerenderAdditionalCheck", function (req) {
+      isEnabledWas = isEnabled;
+      isEnabled =
+        new Date() > new Date(bootedAt + parsedCrawlDelaySeconds * 1000);
+      if (isEnabled && !isEnabledWas) {
+        console.log(
+          "first pre-rendering request since crawl delay was enabled, proceeding"
+        );
+      }
+
+      return isEnabled;
+    });
+  }
 
   if (s3Bucket) {
     // TODO: implement whitelist and redirects for s3 proxy
@@ -187,11 +201,7 @@ exports.start = function (options, _onStarted) {
     onStarted(err, server.address())
   );
 
-  if (
-    whitelist &&
-    options["--crawl-whitelist-on-boot"] &&
-    process.env.CRAWL_HOST
-  ) {
+  if (crawlAtBootEnabled) {
     const p = () =>
       require("./lib/crawl-whitelist")(process.env.CRAWL_HOST, whitelist).then(
         (results) => {
@@ -200,11 +210,30 @@ exports.start = function (options, _onStarted) {
         }
       );
 
-    if (!process.env.CRAWL_DELAY_SECONDS) {
+    if (!parsedCrawlDelaySeconds || parsedCrawlDelaySeconds <= 0) {
       return p();
     }
+    console.log(
+      "NOTICE: CRAWL_DELAY_SECONDS configured, waiting",
+      parsedCrawlDelaySeconds,
+      "seconds before crawling"
+    );
 
-    setTimeout(() => p(), parseInt(process.env.CRAWL_DELAY_SECONDS) * 1000);
+    const buffer = 1000;
+    const delayMs = parsedCrawlDelaySeconds * 1000 + buffer;
+    setTimeout(() => {
+      console.log("CRAWL_DELAY_SECONDS elapsed, commencing crawl whitelist");
+
+      p();
+    }, delayMs);
+  }
+
+  if (!options["--enable-middleware-cache"]) {
+    console.log(
+      "\nWARNING: middleware-cache is off, causing 1-3s delay on page refreshes\n" +
+        "        This is desirable during dev and testing while iterating on code\n" +
+        "        but \x1b[1min production, use --enable-middleware-cache\x1b[0m for faster responses"
+    );
   }
 
   return server;

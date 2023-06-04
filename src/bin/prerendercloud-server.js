@@ -48,20 +48,40 @@ allArgs.forEach((arg) => {
   }
 });
 
+const successColor = "\x1b[32m";
+const resetColor = "\x1b[0m";
+
+console.log(
+  "\nStarting Headless-Render-API.com pushstate server for single-page apps"
+);
+console.log("rebranded from prerender.cloud in may 2022");
+
 const server = require("../index.js");
-server.start(parsedOptions, function (err, address) {
+
+server.start(parsedOptions, (err, address) => {
   if (err) {
-    console.log(err);
+    console.error(err);
     process.exit(1);
   }
 
   console.log(
-    `Prerender.cloud pushstate server started: http://${address.address}:${address.port}`
+    "\nWARNING: If using localhost or a private IP, follow the steps below for a public IP:\n"
   );
+
+  console.log("  OPTION A: Use a service like ngrok.com");
+  console.log("            e.g., Run \x1b[1mngrok http 9000\x1b[0m\n");
+
+  console.log("  OPTION B: Use a VPS with an SSH reverse tunnel");
   console.log(
-    "NOTE: if running from your laptop on localhost or 127.0.0.1 or 0.0.0.0 you'll need a public IP so service.prerender.cloud to access your server"
+    "            e.g., Run \x1b[1mssh user@myremotehost.com -R 9000:localhost:9000\x1b[0m\n"
   );
+
+  console.log("for more info:");
+  console.log(" - https://headless-render-api.com");
+  console.log(" - https://github.com/sanfrancesco/prerendercloud-server\n");
+
   console.log(
-    "To get a public IP for your machine use a service like ngrok.com (then run: ngrok http 9000) or if you have a VPS, an SSH reverse tunnel (something like: ssh user@www.myremotehost.com -R 9000:localhost:9000)"
+    `${successColor}Pushstate Server (SPA) started successfully on: http://${address.address}:${address.port}\n`
   );
+  console.log("Enjoy!", resetColor);
 });

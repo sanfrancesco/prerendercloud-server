@@ -109,7 +109,7 @@ module.exports = function (directory) {
     redirects = Redirects.from(fs.readFileSync(filePath).toString());
   } catch (err) {
     if (err.message.match("ENOENT")) {
-      console.log("no _redirects file was detected");
+      console.log(` - ${FILE_NAME}    was not found (searched at ${filePath})`);
       return null;
     } else {
       throw err;
