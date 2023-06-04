@@ -17,7 +17,7 @@ testintegration:
 test: testcrawl testintegration
 
 cibuild:
-	rm -rf publish && mkdir publish && cp -r src/ publish/
+	rm -rf publish && mkdir publish && cp -r src publish/
 	cp README.md package.json package-lock.json publish/
 
 npmpublish: build

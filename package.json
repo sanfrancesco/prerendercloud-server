@@ -1,8 +1,8 @@
 {
   "name": "prerendercloud-server",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "description": "Headless-Render-API pre-rendering, pushstate web server",
-  "main": "./bin/prerendercloud-server",
+  "main": "./src/bin/prerendercloud-server",
   "repository": {
     "type": "git",
     "url": "https://github.com/sanfrancesco/prerendercloud-server.git"
@@ -38,6 +38,6 @@
     "supertest": "^6.2.3"
   },
   "bin": {
-    "prerendercloud-server": "./bin/prerendercloud-server"
+    "prerendercloud-server": "./src/bin/prerendercloud-server"
   }
 }
