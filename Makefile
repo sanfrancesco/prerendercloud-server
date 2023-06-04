@@ -1,4 +1,4 @@
-.PHONY: build publish test prettier
+.PHONY: build cibuild publish test prettier
 
 prettier:
 	./node_modules/.bin/prettier --write "src/**/*.js"
@@ -15,13 +15,6 @@ testintegration:
 	./node_modules/jasmine/bin/jasmine.js spec/integrationSpec.js
 
 test: testcrawl testintegration
-
-build: prettier
-	npm run build
-	rm -rf publish
-	mkdir publish
-	cp -r dist publish/
-	cp README.md package.json package-lock.json publish/
 
 cibuild:
 	rm -rf publish && mkdir publish && cp -r src/ publish/
