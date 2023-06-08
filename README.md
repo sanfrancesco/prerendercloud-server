@@ -170,7 +170,8 @@ docker run \
   - most common use case: configure your DNS to point apex and www to `example.com`, set `CANONICAL_HOST=example.com`, and requests to www.example.com will redirect to apex
   - override the header used to detect host with `HOST_HEADER` (defaults to `host`, if on AWS behind ALB, set `HOST_HEADER=x-forwarded-proto`)
 - `CRAWL_HOST` - if using `--crawl-whitelist-on-boot`, e.g. `CRAWL_HOST=example.com` (no protocol, no slashes)
-  - use with `CRAWL_DELAY_SECONDS` to give your process enough time to boot and go live (35s is a safe/common value)
+  - use with `DISABLE_PRERENDERING_FOR_SECONDS` to give your process enough time to boot and go live (35s is a safe/common value)
+- `DISABLE_PRERENDERING_FOR_SECONDS` is null by default, but if you're running in production with zero-downtime deploys (Kubernetes, Nomad, Fly.io, AWS Beanstalk, etc.), then set this to avoid initial requests hitting the old version of your app during the deploy
 - `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` if using s3 proxy
 
 #### Options
