@@ -136,19 +136,25 @@ exports.start = function (options, _onStarted) {
 
   const crawlAtBootEnabled =
     whitelist && options["--crawl-whitelist-on-boot"] && process.env.CRAWL_HOST;
-  const parsedCrawlDelaySeconds =
-    crawlAtBootEnabled && parseInt(process.env.CRAWL_DELAY_SECONDS);
+  const parsedDisablePrerenderingSeconds = parseInt(
+    process.env.DISABLE_PRERENDERING_FOR_SECONDS ||
+      process.env.CRAWL_DELAY_SECONDS
+  );
   const bootedAt = Date.now();
 
-  if (parsedCrawlDelaySeconds && parsedCrawlDelaySeconds > 0) {
+  if (
+    parsedDisablePrerenderingSeconds &&
+    parsedDisablePrerenderingSeconds > 0
+  ) {
     let isEnabled = false;
     prerendercloud.set("shouldPrerenderAdditionalCheck", function (req) {
       isEnabledWas = isEnabled;
       isEnabled =
-        new Date() > new Date(bootedAt + parsedCrawlDelaySeconds * 1000);
+        new Date() >
+        new Date(bootedAt + parsedDisablePrerenderingSeconds * 1000);
       if (isEnabled && !isEnabledWas) {
         console.log(
-          "first pre-rendering request since crawl delay was enabled, proceeding"
+          "first pre-rendering request since DISABLE_PRERENDERING_FOR_SECONDS was enabled, proceeding"
         );
       }
 
@@ -210,19 +216,24 @@ exports.start = function (options, _onStarted) {
         }
       );
 
-    if (!parsedCrawlDelaySeconds || parsedCrawlDelaySeconds <= 0) {
+    if (
+      !parsedDisablePrerenderingSeconds ||
+      parsedDisablePrerenderingSeconds <= 0
+    ) {
       return p();
     }
     console.log(
-      "NOTICE: CRAWL_DELAY_SECONDS configured, waiting",
-      parsedCrawlDelaySeconds,
+      "NOTICE: DISABLE_PRERENDERING_FOR_SECONDS configured, waiting",
+      parsedDisablePrerenderingSeconds,
       "seconds before crawling"
     );
 
     const buffer = 1000;
-    const delayMs = parsedCrawlDelaySeconds * 1000 + buffer;
+    const delayMs = parsedDisablePrerenderingSeconds * 1000 + buffer;
     setTimeout(() => {
-      console.log("CRAWL_DELAY_SECONDS elapsed, commencing crawl whitelist");
+      console.log(
+        "DISABLE_PRERENDERING_FOR_SECONDS elapsed, commencing crawl whitelist"
+      );
 
       p();
     }, delayMs);

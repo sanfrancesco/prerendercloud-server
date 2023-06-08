@@ -4,7 +4,7 @@
 # OPTIONAL:
 # 1. optionally set CANONICAL_HOST to your actual domain name e.g. www.example.com, then if you have apex example.com also pointed here, it will redirect to www.example.com
 # 2. optionally set CRAWL_HOST to your actual domain name e.g. www.example.com, use with `--crawl-whitelist-on-boot` (see readme)
-# 3. if using CRAWL_HOST, set CRAWL_DELAY_SECONDS to "30" (it takes approximately 30s for fly.io to finish booting)
+# 3. set DISABLE_PRERENDERING_FOR_SECONDS to "40" to give fly.io deploys enough time to finish before pre-rendering (to avoid pre-rendering the old version)
 
 app = "placeholder-for-your-actual-fly-app-name"
 
@@ -16,7 +16,7 @@ processes = []
   PRERENDER_TOKEN = ""
   CANONICAL_HOST=""
   CRAWL_HOST=""
-  CRAWL_DELAY_SECONDS=""
+  DISABLE_PRERENDERING_FOR_SECONDS="40"
 
 [experimental]
   allowed_public_ports = []
